@@ -7,11 +7,10 @@
 
 Summary: D-BUS message bus
 Name: dbus
-Version: 1.0.2 
-Release: 4%{?dist}
+Version: 1.1.0 
+Release: 1%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
-Source1: doxygen_to_devhelp.xsl
 License: AFL/GPL
 Group: System Environment/Libraries
 BuildRoot: %{_tmppath}/%{name}-root
@@ -36,8 +35,7 @@ Conflicts: cups < 1:1.1.20-4
 Patch0: dbus-0.61-selinux-avc-audit.patch
 Patch1: dbus-0.60-start-early.patch
 Patch2: dbus-0.92-audit-system.patch
-Patch4: dbus-1.0.1-generate-xml-docs.patch
-Patch5: dbus-1.0.2-selinux.patch
+Patch3: dbus-1.0.0-no_fatal_checks.patch
 
 %description
 
@@ -72,8 +70,7 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .selinux-avc-audit
 %patch1 -p1 -b .start-early
 %patch2 -p1 -b .audit_system
-%patch4 -p1 -b .generate-xml-docs
-%patch5 -p1 -b .selinux-send-to-audit
+%patch3 -p1 -b .no_fatal_checks
 
 autoreconf -f -i
 
@@ -89,12 +86,8 @@ make clean
 
 # leave verbose mode so people can debug their apps but make sure to
 # turn it off on stable releases with --disable-verbose-mode
-%configure $COMMON_ARGS --disable-tests --disable-asserts --enable-doxygen-docs --enable-xml-docs
+%configure $COMMON_ARGS --disable-tests --disable-asserts --disable-verbose-mode
 make
-
-doxygen Doxyfile
-
-xsltproc -o dbus.devhelp %{SOURCE1} doc/api/xml/index.xml
 
 %install
 rm -rf %{buildroot}
@@ -114,15 +107,6 @@ mv -f $RPM_BUILD_ROOT/%{_lib}/dbus-1.0/include/* $RPM_BUILD_ROOT/%{_libdir}/dbus
 
 rm -f $RPM_BUILD_ROOT/%{_lib}/*.a
 rm -f $RPM_BUILD_ROOT/%{_lib}/*.la
-
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus/api
-
-cp dbus.devhelp $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/dbus-specification.html $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/dbus-faq.html $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/dbus-tutorial.html $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/api/html/* $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus/api
 
 ## %find_lang %{gettext_package}
 
@@ -187,9 +171,11 @@ fi
 %{_libdir}/dbus-1.0/include/
 %{_libdir}/pkgconfig/dbus-1.pc
 %{_includedir}/*
-%{_datadir}/devhelp/books/dbus
 
 %changelog
+* Thu Jun 14 2007 John (J5) Palmieri <johnp@redhat.com> - 1.1.0-1
+- Build 1.1.0 for olpc2
+
 * Sat Apr 14 2007 Matthias Clasen <mclasen@redhat.com> - 1.0.2-4
 - Move the dbus-launch man page to the x11 subpackage
 
