@@ -8,7 +8,7 @@
 Summary: D-BUS message bus
 Name: dbus
 Version: 1.1.0 
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 License: AFL/GPL
@@ -140,6 +140,7 @@ fi
 %config %{_sysconfdir}/dbus-1/*.conf
 %config %{_sysconfdir}/rc.d/init.d/*
 %dir %{_sysconfdir}/dbus-1/system.d
+%dir %{_sysconfdir}/dbus-1/session.d
 %dir %{_localstatedir}/run/dbus
 %dir %{_localstatedir}/lib/dbus/
 %dir /%{_lib}/dbus-1.0
@@ -173,6 +174,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Fri Jun 22 2007 John (J5) Palmieri <johnp@redhat.com> - 1.1.0-2
+- Own the /etc/dbus-1/session.d directory
+
 * Thu Jun 14 2007 John (J5) Palmieri <johnp@redhat.com> - 1.1.0-1
 - Build 1.1.0 for olpc2
 
