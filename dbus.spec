@@ -8,7 +8,7 @@
 Summary: D-BUS message bus
 Name: dbus
 Version: 1.0.2 
-Release: 6%{?dist}
+Release: 7%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -37,6 +37,8 @@ Patch1: dbus-0.60-start-early.patch
 Patch2: dbus-0.92-audit-system.patch
 Patch4: dbus-1.0.1-generate-xml-docs.patch
 Patch5: dbus-1.0.2-selinux.patch
+# CVE-2008-0595
+Patch6: dbus-fix-for-cve-2008-0595.patch
 
 %description
 
@@ -73,6 +75,7 @@ in this separate package so server systems need not install X.
 %patch2 -p1 -b .audit_system
 %patch4 -p1 -b .generate-xml-docs
 %patch5 -p1 -b .selinux-send-to-audit
+%patch6 -p1 -b .cve-2008-0595
 
 autoreconf -f -i
 
@@ -189,6 +192,9 @@ fi
 %{_datadir}/devhelp/books/dbus
 
 %changelog
+* Wed Feb 27 2008 David Zeuthen <davidz@redhat.com> - 1.0.2-7%{?dist}
+- CVE-2008-0595
+
 * Fri Jun 22 2007 Matthias Clasen <mclasen@redhat.com> - 1.0.2-6
 - Don't require libxml-python needlessly (#245300)
 
