@@ -8,7 +8,7 @@
 Summary: D-BUS message bus
 Name: dbus
 Version: 1.2.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -39,6 +39,7 @@ Conflicts: cups < 1:1.1.20-4
 
 Patch0: dbus-0.60-start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
+Patch2: dbus-1.1-fix_userdb_macro.patch
 
 %description
 
@@ -94,6 +95,7 @@ in this separate package so server systems need not install X.
 
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
+%patch2 -p1 -b .fix_userdb_macro
 
 autoreconf -f -i
 
@@ -221,6 +223,13 @@ fi
 %{_includedir}/*
 
 %changelog
+* Fri May 05 2008 John (J5) Palmieri <johnp@redhat.com> - 1.2.1-2
+- patch to enable dbus userdb caching as was the default in 1.0.x
+- previous upstream commit had accidentally disabled it because
+  of mispelled macro names - the non-cached codepath can cause
+  a crash of the bus
+- fd.o bug #15588 - https://bugs.freedesktop.org/show_bug.cgi?id=15588
+
 * Fri Apr 04 2008 John (J5) Palmieri <johnp@redhat.com> - 1.2.1-1
 - update to latest upstream
 - major version change is really a maint release for 1.1.20
