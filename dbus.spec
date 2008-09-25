@@ -8,7 +8,7 @@
 Summary: D-BUS message bus
 Name: dbus
 Version: 1.2.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -172,7 +172,7 @@ fi
 %doc COPYING ChangeLog NEWS
 
 %dir %{_sysconfdir}/dbus-1
-%config(noreplace) %{_sysconfdir}/dbus-1/*.conf
+%config %{_sysconfdir}/dbus-1/*.conf
 %{_sysconfdir}/rc.d/init.d/*
 %dir %{_sysconfdir}/dbus-1/system.d
 %dir %{_sysconfdir}/dbus-1/session.d
@@ -223,6 +223,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu Sep 25 2008 David Zeuthen <davidz@redhat.com> - 1.2.1-3%{?dist}
+- Avoid using noreplace for files that aren't really config files
+
 * Fri May 05 2008 John (J5) Palmieri <johnp@redhat.com> - 1.2.1-2
 - patch to enable dbus userdb caching as was the default in 1.0.x
 - previous upstream commit had accidentally disabled it because
