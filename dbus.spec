@@ -1,24 +1,23 @@
 %define gettext_package dbus
 
 %define expat_version           1.95.5
-%define libselinux_version	1.15.2	
+%define libselinux_version      1.15.2
 
 %define dbus_user_uid           81
 
 Summary: D-BUS message bus
 Name: dbus
-Version: 1.1.2
-Release: 9%{?dist}
+Version: 1.2.4
+Release: 1%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
+Source2: 00-start-message-bus.sh
 License: GPLv2+ or AFL
 Group: System Environment/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
-PreReq: /usr/sbin/useradd
-Requires: chkconfig >= 1.3.26
-BuildPreReq: libtool
-#BuildRequires: redhat-release 
+
+BuildRequires: libtool
 BuildRequires: expat-devel >= %{expat_version}
 BuildRequires: libselinux-devel >= %{libselinux_version}
 BuildRequires: audit-libs-devel >= 0.9
@@ -28,23 +27,19 @@ BuildRequires: gettext
 BuildRequires: doxygen
 BuildRequires: xmlto
 BuildRequires: libxslt
+
+Requires: chkconfig >= 1.3.26
 Requires: libselinux >= %{libselinux_version}
 Requires: dbus-libs = %{version}-%{release}
+Requires(pre): /usr/sbin/useradd
 
+# Conflict with cups prior to configuration file change, so that the
+# %postun service condrestart works.
 Conflicts: cups < 1:1.1.20-4
 
-Patch0: dbus-0.60-start-early.patch
+Patch0: start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
-# https://bugs.freedesktop.org/show_bug.cgi?id=11491
-Patch2: dbus-1.0.2-lsb.patch
-# https://bugs.freedesktop.org/show_bug.cgi?id=12429
-Patch3: dbus-1.1.2-audit-user.patch
-# https://bugs.freedesktop.org/show_bug.cgi?id=12430
-Patch4: dbus-1.1.2-no-abort.patch
-# from upstream git
-Patch5: dbus-pie.patch
-# CVE-2008-0595
-Patch6: dbus-fix-for-cve-2008-0595.patch
+Patch6: dbus-1.2.1-increase-timeout.patch
 
 %description
 
@@ -61,6 +56,16 @@ Obsoletes: dbus < 1.1.2-3
 %description libs
 Lowlevel libraries for accessing D-BUS
 
+%package doc
+Summary: Developer documentation for D-BUS
+Group: Documentation
+Requires: %name = %{version}-%{release}
+Requires: devhelp
+
+%description doc 
+This package contains DevHelp developer documentation for D-Bus along with
+other supporting documentation such as the introspect dtd file
+
 %package devel
 Summary: Libraries and headers for D-BUS
 Group: Development/Libraries
@@ -74,7 +79,6 @@ Headers and static libraries for D-BUS.
 %package x11
 Summary: X11-requiring add-ons for D-BUS
 Group: Development/Libraries
-Requires: libX11
 Requires: %name = %{version}-%{release}
 
 %description x11
@@ -85,13 +89,13 @@ in this separate package so server systems need not install X.
 %prep
 %setup -q
 
+# For some reason upstream ships these files as executable
+# Make sure they are not
+/bin/chmod 0644 COPYING ChangeLog NEWS
+
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
-%patch2 -p1 -b .lsb
-%patch3 -p1 -b .audit-user
-%patch4 -p1 -b .abort
-%patch5 -p1 -b .pie
-%patch6 -p1 -b .cve-2008-0595
+%patch6 -p1 -b .increase-timeout
 
 autoreconf -f -i
 
@@ -110,31 +114,35 @@ xsltproc -o dbus.devhelp %{SOURCE1} doc/api/xml/index.xml
 %install
 rm -rf %{buildroot}
 
-make install DESTDIR=$RPM_BUILD_ROOT
+make install DESTDIR=%{buildroot}
 
-mkdir -p $RPM_BUILD_ROOT/%{_libdir}/pkgconfig
+mkdir -p %{buildroot}/%{_libdir}/pkgconfig
 
 #change the arch-deps.h include directory to /usr/lib[64] instead of /lib[64]
-sed -e 's@-I${libdir}@-I${prefix}/%{_lib}@' $RPM_BUILD_ROOT/%{_lib}/pkgconfig/dbus-1.pc > $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/dbus-1.pc
-rm -f $RPM_BUILD_ROOT/%{_lib}/pkgconfig/dbus-1.pc
+sed -e 's@-I${libdir}@-I${prefix}/%{_lib}@' %{buildroot}/%{_lib}/pkgconfig/dbus-1.pc > %{buildroot}/%{_libdir}/pkgconfig/dbus-1.pc
+rm -f %{buildroot}/%{_lib}/pkgconfig/dbus-1.pc
 
-mkdir -p $RPM_BUILD_ROOT/%{_bindir}
-mv -f $RPM_BUILD_ROOT/bin/dbus-launch $RPM_BUILD_ROOT/%{_bindir}
-mkdir -p $RPM_BUILD_ROOT/%{_libdir}/dbus-1.0/include/
-mv -f $RPM_BUILD_ROOT/%{_lib}/dbus-1.0/include/* $RPM_BUILD_ROOT/%{_libdir}/dbus-1.0/include/
-rm -rf $RPM_BUILD_ROOT/%{_lib}/dbus-1.0
+mkdir -p %{buildroot}/%{_bindir}
+mv -f %{buildroot}/bin/dbus-launch %{buildroot}/%{_bindir}
+mkdir -p %{buildroot}/%{_libdir}/dbus-1.0/include/
+mv -f %{buildroot}/%{_lib}/dbus-1.0/include/* %{buildroot}/%{_libdir}/dbus-1.0/include/
+rm -rf %{buildroot}/%{_lib}/dbus-1.0
 
-rm -f $RPM_BUILD_ROOT/%{_lib}/*.a
-rm -f $RPM_BUILD_ROOT/%{_lib}/*.la
+rm -f %{buildroot}/%{_lib}/*.a
+rm -f %{buildroot}/%{_lib}/*.la
 
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus/api
+mkdir -p %{buildroot}%{_datadir}/devhelp/books/dbus
+mkdir -p %{buildroot}%{_datadir}/devhelp/books/dbus/api
 
-cp dbus.devhelp $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/dbus-specification.html $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/dbus-faq.html $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/dbus-tutorial.html $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus
-cp doc/api/html/* $RPM_BUILD_ROOT%{_datadir}/devhelp/books/dbus/api
+cp dbus.devhelp %{buildroot}%{_datadir}/devhelp/books/dbus
+cp doc/dbus-specification.html %{buildroot}%{_datadir}/devhelp/books/dbus
+cp doc/dbus-faq.html %{buildroot}%{_datadir}/devhelp/books/dbus
+cp doc/dbus-tutorial.html %{buildroot}%{_datadir}/devhelp/books/dbus
+cp doc/api/html/* %{buildroot}%{_datadir}/devhelp/books/dbus/api
+
+install -D -m755 %{SOURCE2} %{buildroot}%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
+
+mkdir -p %{buildroot}%{_datadir}/dbus-1/interfaces
 
 ## %find_lang %{gettext_package}
 
@@ -154,19 +162,21 @@ rm -rf %{buildroot}
 
 %preun
 if [ $1 = 0 ]; then
+    /sbin/service messagebus stop
     /sbin/chkconfig --del messagebus
 fi
 
 %postun libs -p /sbin/ldconfig
 
+
 %files
 %defattr(-,root,root)
 
-%doc COPYING ChangeLog NEWS
+%doc COPYING
 
 %dir %{_sysconfdir}/dbus-1
 %config %{_sysconfdir}/dbus-1/*.conf
-%config %{_sysconfdir}/rc.d/init.d/*
+%{_sysconfdir}/rc.d/init.d/*
 %dir %{_sysconfdir}/dbus-1/system.d
 %dir %{_sysconfdir}/dbus-1/session.d
 %dir %{_localstatedir}/run/dbus
@@ -176,14 +186,15 @@ fi
 /bin/dbus-cleanup-sockets
 /bin/dbus-monitor
 /bin/dbus-uuidgen
-%{_datadir}/man/man*/dbus-cleanup-sockets.1.gz
-%{_datadir}/man/man*/dbus-daemon.1.gz
-%{_datadir}/man/man*/dbus-monitor.1.gz
-%{_datadir}/man/man*/dbus-send.1.gz
-%{_datadir}/man/man*/dbus-uuidgen.1.gz
+%{_mandir}/man*/dbus-cleanup-sockets.1.gz
+%{_mandir}/man*/dbus-daemon.1.gz
+%{_mandir}/man*/dbus-monitor.1.gz
+%{_mandir}/man*/dbus-send.1.gz
+%{_mandir}/man*/dbus-uuidgen.1.gz
 %dir %{_datadir}/dbus-1
 %{_datadir}/dbus-1/services
 %{_datadir}/dbus-1/system-services
+%{_datadir}/dbus-1/interfaces
 %dir /%{_lib}/dbus-1
 # See doc/system-activation.txt in source tarball for the rationale
 # behind these permissions
@@ -199,6 +210,12 @@ fi
 
 %{_bindir}/dbus-launch
 %{_datadir}/man/man*/dbus-launch.1.gz
+%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
+
+%files doc
+%defattr(-,root,root)
+%doc doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
+%{_datadir}/devhelp/books/dbus
 
 %files devel
 %defattr(-,root,root)
@@ -208,11 +225,72 @@ fi
 %{_libdir}/dbus-1.0/include/
 %{_libdir}/pkgconfig/dbus-1.pc
 %{_includedir}/*
-%{_datadir}/devhelp/books/dbus
 
 %changelog
-* Wed Feb 27 2008 David Zeuthen <davidz@redhat.com> - 1.1.2-9%{?dist}
-- CVE-2008-0595
+* Mon Oct 06 2008 Colin Walters <walters@redhat.com> - 1.2.4-1
+- New upstream 1.2.4
+
+* Thu Sep 25 2008 David Zeuthen <davidz@redhat.com> - 1.2.3-2%{?dist}
+- Avoid using noreplace for files that aren't really config files
+
+* Wed Aug 06 2008 Colin Walters <walters@redhat.com> - 1.2.3-1
+- New upstream 1.2.2
+- Drop patches that were upstreamed
+
+* Wed Jul 23 2008 Matthias Clasen <mclasen@redhat.com> - 1.2.1-7
+- Own /usr/share/dbus-1/interfaces
+
+* Fri Jul 18 2008 Matthias Clasen <mclasen@redhat.com> - 1.2.1-6
+- Add a patch from upstream git that adds a method
+  for changing the activation environment on the session bus
+
+* Thu Jul 17 2008 Casey Dahlin <cdahlin@redhat.com> - 1.2.1-5
+- Patch to increase max method timeout
+
+* Thu May 29 2008 Casey Dahlin <cdahlin@redhat.com> - 1.2.1-4
+- Patches for fd.o bugs 15635, 15571, 15588, 15570
+
+* Mon May 12 2008 Ray Strode <rstrode@redhat.com> - 1.2.1-3
+- drop last patch after discussion on dbus list
+
+* Mon May 12 2008 Ray Strode <rstrode@redhat.com> - 1.2.1-2
+- ensure uuid is created at post time
+
+* Fri Apr 04 2008 John (J5) Palmieri <johnp@redhat.com> - 1.2.1-1
+- update to latest upstream
+- major version change is really a maint release for 1.1.20
+  please read the NEWS file in the source for more information
+
+* Wed Feb 27 2008 David Zeuthen <davidz@redhat.com> - 1.1.20-1%{?dist}
+- Update to latest upstream release. Includes fix for CVE-2008-0595.
+- Drop some patches that went upstream already
+
+* Wed Feb 20 2008 Mamoru Tasaka <mtasaka@ioa.s.u-tokyo.ac.jp> - 1.1.4-6
+- Really rebuild against new libcap
+
+* Sun Feb 17 2008 Adam Tkac <atkac redhat com> - 1.1.4-5
+- rebuild against new libcap
+
+* Tue Feb  5 2008 Matthias Clasen <mclasen@redhat.com> - 1.1.4-4
+- Fix a dbus-launch problem (#430412)
+
+* Mon Feb  4 2008 Ray Strode <rstrode@redhat.com> - 1.1.4-3
+- Start message bus from xinitrc.d instead of hard coding it
+at the end of Xsession
+
+* Mon Feb  4 2008 Matthias Clasen <mclasen@redhat.com> - 1.1.4-2
+- Make it build against the latest gcc/glibc
+
+* Thu Jan 17 2008 John (J5) Palmieri <johnp@redhat.com> - 1.1.4-1
+- new upstream version
+- fixes inotify patch which was consuming 100% cpu and memory
+
+* Wed Jan 16 2008 John (J5) Palmieri <johnp@redhat.com> - 1.1.3-1
+- new upstream version which obsoletes a number of our patches
+- doc section added for the devhelp docs
+
+* Thu Nov 15 2007 John (J5) Palmieri <johnp@redhat.com> - 1.1.2-9
+- clean up spec file as per the merge review (#225676)
 
 * Thu Oct 25 2007 Bill Nottingham <notting@redhat.com> - 1.1.2-8
 - have -libs obsolete older versions of the main package so that yum upgrades work
@@ -300,7 +378,7 @@ only system will.
   non-autolaunch code path (bug 214649)
 
 * Mon Nov 06 2006 John (J5) Palmieri <johnp@redhat.com> - 0.95-2
-- Add /var/lib/dbus directory to %files
+- Add /var/lib/dbus directory to %%files
 
 * Fri Nov 03 2006 John (J5) Palmieri <johnp@redhat.com> - 0.95-1
 - Update to D-Bus 1.0 RC 3 (0.95)
@@ -343,8 +421,8 @@ only system will.
   have to be running suring the build.
 
 * Tue Jul 18 2006 John (J5) Palmieri <johnp@redhat.com> - 0.90-3
-- s/--libdir=\/lib/--libdir=% {_lib}/ in configure stage
-- add / before % {_lib}
+- s/--libdir=\/lib/--libdir=%%{_lib}/ in configure stage
+- add / before %%{_lib}
 
 * Tue Jul 18 2006 John (J5) Palmieri <johnp@redhat.com> - 0.90-2
 - Remove some remnants of the GLIB bindings from configure.in
@@ -438,8 +516,8 @@ only system will.
 
 * Tue Aug 23 2005 John (J5) Palmieri <johnp@redhat.com> - 0.36-1
 - Upgrade to dbus-0.36
-- Split modules that go into %{_lib}/python2.4/site-packages/dbus
-and those that go into %{python_sitelib}/dbus (they differ on 64bit)
+- Split modules that go into %%{_lib}/python2.4/site-packages/dbus
+and those that go into %%{python_sitelib}/dbus (they differ on 64bit)
 - Renable Qt bindings since packages in core can use them
 
 * Mon Jul 18 2005 John (J5) Palmieri <johnp@redhat.com> - 0.35.2-1
