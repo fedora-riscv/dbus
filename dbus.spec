@@ -7,8 +7,8 @@
 
 Summary: D-BUS message bus
 Name: dbus
-Version: 1.2.1
-Release: 3%{?dist}
+Version: 1.2.4
+Release: 1%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -37,9 +37,9 @@ Requires(pre): /usr/sbin/useradd
 # %postun service condrestart works.
 Conflicts: cups < 1:1.1.20-4
 
-Patch0: dbus-0.60-start-early.patch
+Patch0: start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
-Patch2: dbus-1.1-fix_userdb_macro.patch
+Patch6: dbus-1.2.1-increase-timeout.patch
 
 %description
 
@@ -95,7 +95,7 @@ in this separate package so server systems need not install X.
 
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
-%patch2 -p1 -b .fix_userdb_macro
+%patch6 -p1 -b .increase-timeout
 
 autoreconf -f -i
 
@@ -142,6 +142,8 @@ cp doc/api/html/* %{buildroot}%{_datadir}/devhelp/books/dbus/api
 
 install -D -m755 %{SOURCE2} %{buildroot}%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
 
+mkdir -p %{buildroot}%{_datadir}/dbus-1/interfaces
+
 ## %find_lang %{gettext_package}
 
 %clean
@@ -166,10 +168,11 @@ fi
 
 %postun libs -p /sbin/ldconfig
 
+
 %files
 %defattr(-,root,root)
 
-%doc COPYING ChangeLog NEWS
+%doc COPYING
 
 %dir %{_sysconfdir}/dbus-1
 %config %{_sysconfdir}/dbus-1/*.conf
@@ -191,6 +194,7 @@ fi
 %dir %{_datadir}/dbus-1
 %{_datadir}/dbus-1/services
 %{_datadir}/dbus-1/system-services
+%{_datadir}/dbus-1/interfaces
 %dir /%{_lib}/dbus-1
 # See doc/system-activation.txt in source tarball for the rationale
 # behind these permissions
@@ -223,15 +227,34 @@ fi
 %{_includedir}/*
 
 %changelog
-* Thu Sep 25 2008 David Zeuthen <davidz@redhat.com> - 1.2.1-3%{?dist}
+* Mon Oct 06 2008 Colin Walters <walters@redhat.com> - 1.2.4-1
+- New upstream 1.2.4
+
+* Thu Sep 25 2008 David Zeuthen <davidz@redhat.com> - 1.2.3-2%{?dist}
 - Avoid using noreplace for files that aren't really config files
 
-* Fri May 05 2008 John (J5) Palmieri <johnp@redhat.com> - 1.2.1-2
-- patch to enable dbus userdb caching as was the default in 1.0.x
-- previous upstream commit had accidentally disabled it because
-  of mispelled macro names - the non-cached codepath can cause
-  a crash of the bus
-- fd.o bug #15588 - https://bugs.freedesktop.org/show_bug.cgi?id=15588
+* Wed Aug 06 2008 Colin Walters <walters@redhat.com> - 1.2.3-1
+- New upstream 1.2.2
+- Drop patches that were upstreamed
+
+* Wed Jul 23 2008 Matthias Clasen <mclasen@redhat.com> - 1.2.1-7
+- Own /usr/share/dbus-1/interfaces
+
+* Fri Jul 18 2008 Matthias Clasen <mclasen@redhat.com> - 1.2.1-6
+- Add a patch from upstream git that adds a method
+  for changing the activation environment on the session bus
+
+* Thu Jul 17 2008 Casey Dahlin <cdahlin@redhat.com> - 1.2.1-5
+- Patch to increase max method timeout
+
+* Thu May 29 2008 Casey Dahlin <cdahlin@redhat.com> - 1.2.1-4
+- Patches for fd.o bugs 15635, 15571, 15588, 15570
+
+* Mon May 12 2008 Ray Strode <rstrode@redhat.com> - 1.2.1-3
+- drop last patch after discussion on dbus list
+
+* Mon May 12 2008 Ray Strode <rstrode@redhat.com> - 1.2.1-2
+- ensure uuid is created at post time
 
 * Fri Apr 04 2008 John (J5) Palmieri <johnp@redhat.com> - 1.2.1-1
 - update to latest upstream
