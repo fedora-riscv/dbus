@@ -7,7 +7,7 @@
 
 Summary: D-BUS message bus
 Name: dbus
-Version: 1.2.6
+Version: 1.2.8
 Release: 1%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -225,6 +225,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Tue Dec 08 2008 Colin Walters <walters@redhat.com> - 1.2.8-1
+- New upstream 1.2.8
+
 * Fri Dec 05 2008 Colin Walters <walters@redhat.com> - 1.2.6-1
 - New upstream 1.2.6
 
