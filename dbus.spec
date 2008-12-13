@@ -7,7 +7,8 @@
 
 Summary: D-BUS message bus
 Name: dbus
-Version: 1.2.8
+Epoch: 1
+Version: 1.2.4
 Release: 1%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -30,7 +31,7 @@ BuildRequires: libxslt
 
 Requires: chkconfig >= 1.3.26
 Requires: libselinux >= %{libselinux_version}
-Requires: dbus-libs = %{version}-%{release}
+Requires: dbus-libs = %{epoch}:%{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 
 # Conflict with cups prior to configuration file change, so that the
@@ -49,7 +50,7 @@ per-user-login-session messaging facility.
 %package libs
 Summary: Libraries for accessing D-BUS
 Group: Development/Libraries
-Requires: %name = %{version}-%{release}
+Requires: %name = %{epoch}:%{version}-%{release}
 Obsoletes: dbus < 1.1.2-3
 
 %description libs
@@ -58,7 +59,7 @@ This package contains lowlevel libraries for accessing D-BUS.
 %package doc
 Summary: Developer documentation for D-BUS
 Group: Documentation
-Requires: %name = %{version}-%{release}
+Requires: %name = %{epoch}:%{version}-%{release}
 Requires: devhelp
 
 %description doc 
@@ -68,7 +69,7 @@ other supporting documentation such as the introspect dtd file.
 %package devel
 Summary: Development files for D-BUS
 Group: Development/Libraries
-Requires: %name = %{version}-%{release}
+Requires: %name = %{epoch}:%{version}-%{release}
 Requires: pkgconfig
 
 %description devel
@@ -78,7 +79,7 @@ developing software that uses D-BUS.
 %package x11
 Summary: X11-requiring add-ons for D-BUS
 Group: Development/Libraries
-Requires: %name = %{version}-%{release}
+Requires: %name = %{epoch}:%{version}-%{release}
 
 %description x11
 D-BUS contains some tools that require Xlib to be installed, those are
@@ -225,6 +226,11 @@ fi
 %{_includedir}/*
 
 %changelog
+* Fri Dec 12 2008 Colin Walters <walters@redhat.com> - 1.2.4-1
+- Revert to 1.2.4, add epoch
+  Too many things broke with this, it looks like there's no way
+  to avoid a flag day.
+
 * Tue Dec 08 2008 Colin Walters <walters@redhat.com> - 1.2.8-1
 - New upstream 1.2.8
 
