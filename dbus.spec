@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -226,7 +226,7 @@ fi
 %{_includedir}/*
 
 %changelog
-* Fri Dec 12 2008 Colin Walters <walters@redhat.com> - 1.2.4-1
+* Fri Dec 12 2008 Colin Walters <walters@redhat.com> - 1.2.4-2
 - Revert to 1.2.4, add epoch
   Too many things broke with this, it looks like there's no way
   to avoid a flag day.
