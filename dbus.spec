@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -41,6 +41,7 @@ Conflicts: cups < 1:1.1.20-4
 Patch0: start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
 Patch6: dbus-1.2.1-increase-timeout.patch
+Patch7: dbus-alpha-unaligned.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -95,6 +96,13 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
 %patch6 -p1 -b .increase-timeout
+
+# At least on alpha the variable is volatile and produces
+# unaligned traps. The patch shouldn't hurt other archs (untested yet),
+# so please consider for inclusion.
+%ifarch alpha
+%patch7 -p1 -b .alpha-unaligned
+%endif
 
 autoreconf -f -i
 
@@ -226,6 +234,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Mon Feb 16 2009 Oliver Falk <oliver@linux-kernel.at> - 1.2.4-3
+- Fix UAAs on alpha. Credits to Jay Estabrook
+
 * Fri Dec 12 2008 Colin Walters <walters@redhat.com> - 1.2.4-2
 - Revert to 1.2.4, add epoch
   Too many things broke with this, it looks like there's no way
