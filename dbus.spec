@@ -41,6 +41,7 @@ Conflicts: cups < 1:1.1.20-4
 Patch0: start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
 Patch6: dbus-1.2.1-increase-timeout.patch
+# http://bugs.freedesktop.org/show_bug.cgi?id=20137
 Patch7: dbus-alpha-unaligned.patch
 
 %description
