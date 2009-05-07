@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -41,6 +41,8 @@ Conflicts: cups < 1:1.1.20-4
 Patch0: start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
 Patch6: dbus-1.2.1-increase-timeout.patch
+
+Patch10: 0001-Bug-17803-Fix-both-test-case-and-validation-logic.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -95,6 +97,8 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
 %patch6 -p1 -b .increase-timeout
+
+%patch10 -p1 -b .cve-2009-1189
 
 autoreconf -f -i
 
@@ -226,6 +230,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu May 07 2009 Colin Walters <walters@verbum.org> - 1.2.4-3
+- Add patch for CVE-2009-1189
+
 * Fri Dec 12 2008 Colin Walters <walters@redhat.com> - 1.2.4-2
 - Revert to 1.2.4, add epoch
   Too many things broke with this, it looks like there's no way
