@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -43,6 +43,8 @@ Patch1: dbus-1.0.1-generate-xml-docs.patch
 Patch6: dbus-1.2.1-increase-timeout.patch
 
 Patch10: 0001-Bug-17803-Fix-both-test-case-and-validation-logic.patch
+# https://bugs.freedesktop.org/show_bug.cgi?id=22516
+Patch11: dbus-inotify-fd-leak.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -99,6 +101,7 @@ in this separate package so server systems need not install X.
 %patch6 -p1 -b .increase-timeout
 
 %patch10 -p1 -b .cve-2009-1189
+%patch11 -p1 -b .inotify-fd-leak
 
 autoreconf -f -i
 
@@ -230,6 +233,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Sat Jun 27 2009 Matthias Clasen <mclasen@redhat.com> - 1.2.4-4
+- Don't leak inotify fd (#505338)
+
 * Thu May 07 2009 Colin Walters <walters@verbum.org> - 1.2.4-3
 - Add patch for CVE-2009-1189
 
