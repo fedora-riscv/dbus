@@ -41,6 +41,9 @@ Conflicts: cups < 1:1.1.20-4
 Patch0: start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
 Patch6: dbus-1.2.1-increase-timeout.patch
+# https://bugs.freedesktop.org/show_bug.cgi?id=22516
+Patch7: dbus-inotify-fd-leak.patch
+
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -96,6 +99,7 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
 %patch6 -p1 -b .increase-timeout
+%patch7 -p1 -b .inotify-fd-leak
 
 autoreconf -f -i
 
@@ -227,6 +231,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Sat Jun 27 2009 Matthias Clasen <mclasen@redhat.com> - 1:1.2.12-2
+- Don't leak inotify fd (#505338)
+
 * Thu Mar 12 2009 Colin Walters <walters@verbum.org> - 1:1.2.12-1
 - Switch to non-permissive branch:
   http://fedoraproject.org/wiki/Features/DBusPolicy
