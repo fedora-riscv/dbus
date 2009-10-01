@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.16
-Release: 5%{?dist}
+Release: 6%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -40,6 +40,9 @@ Conflicts: cups < 1:1.1.20-4
 
 Patch0: start-early.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
+
+# from upstream
+Patch2: fix-timeout-accounting.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -94,6 +97,7 @@ in this separate package so server systems need not install X.
 
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
+%patch2 -p1 -b .fix-timeout-accounting
 
 autoreconf -f -i
 
@@ -226,6 +230,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu Oct  1 2009 Matthias Clasen <mclasen@redhat.com> - 1:1.2.16-6
+- Fix timeout accounting
+
 * Fri Aug 21 2009 Tomas Mraz <tmraz@redhat.com> - 1:1.2.16-5
 - rebuilt with new audit
 
