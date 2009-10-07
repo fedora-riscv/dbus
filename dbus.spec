@@ -47,7 +47,7 @@ Patch1: dbus-1.0.1-generate-xml-docs.patch
 Patch2: fix-timeout-accounting.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=518541
-Patch3: dbus-1.2.16-cabability.patch
+Patch3: dbus-1.2.16-capability.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -103,7 +103,7 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
 %patch2 -p1 -b .fix-timeout-accounting
-%patch3 -p0 -b .cabability
+%patch3 -p0 -b .capability
 
 autoreconf -f -i
 
