@@ -9,11 +9,13 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.16
-Release: 6%{?dist}
+Release: 7%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
 Source2: 00-start-message-bus.sh
+Source3: diagram.png
+Source4: diagram.svg
 License: GPLv2+ or AFL
 Group: System Environment/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
@@ -142,6 +144,10 @@ cp doc/dbus-faq.html %{buildroot}%{_datadir}/devhelp/books/dbus
 cp doc/dbus-tutorial.html %{buildroot}%{_datadir}/devhelp/books/dbus
 cp doc/api/html/* %{buildroot}%{_datadir}/devhelp/books/dbus/api
 
+# missing diagrams
+cp %{SOURCE3} %{buildroot}%{_datadir}/devhelp/books/dbus
+cp %{SOURCE4} %{buildroot}%{_datadir}/devhelp/books/dbus
+
 install -D -m755 %{SOURCE2} %{buildroot}%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
 
 mkdir -p %{buildroot}%{_datadir}/dbus-1/interfaces
@@ -230,6 +236,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Wed Oct  7 2009 Matthias Clasen <mclasen@redhat.com> - 1:1.2.16-7
+- Add missing diagrams to the docs (#527650)
+
 * Thu Oct  1 2009 Matthias Clasen <mclasen@redhat.com> - 1:1.2.16-6
 - Fix timeout accounting
 
