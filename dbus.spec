@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.16
-Release: 7%{?dist}
+Release: 8%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -18,14 +18,14 @@ Source3: diagram.png
 Source4: diagram.svg
 License: GPLv2+ or AFL
 Group: System Environment/Libraries
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: libtool
 BuildRequires: expat-devel >= %{expat_version}
 BuildRequires: libselinux-devel >= %{libselinux_version}
 BuildRequires: audit-libs-devel >= 0.9
 BuildRequires: libX11-devel
-BuildRequires: libcap-devel
+BuildRequires: libcap-ng-devel
 BuildRequires: gettext
 BuildRequires: doxygen
 BuildRequires: xmlto
@@ -45,6 +45,9 @@ Patch1: dbus-1.0.1-generate-xml-docs.patch
 
 # from upstream
 Patch2: fix-timeout-accounting.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=518541
+Patch3: dbus-1.2.16-cabability.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -100,6 +103,7 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
 %patch2 -p1 -b .fix-timeout-accounting
+%patch3 -p1 -b .cabability
 
 autoreconf -f -i
 
@@ -236,6 +240,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Wed Oct  7 2009 Matthias Clasen <mclasen@redhat.com> - 1:1.2.16-8
+- Drop capabilities (#518541)
+
 * Wed Oct  7 2009 Matthias Clasen <mclasen@redhat.com> - 1:1.2.16-7
 - Add missing diagrams to the docs (#527650)
 
