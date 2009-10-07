@@ -103,7 +103,7 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .start-early
 %patch1 -p1 -b .generate-xml-docs
 %patch2 -p1 -b .fix-timeout-accounting
-%patch3 -p1 -b .cabability
+%patch3 -p0 -b .cabability
 
 autoreconf -f -i
 
