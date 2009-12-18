@@ -4,7 +4,7 @@
 %define libselinux_version      1.15.2
 
 %define dbus_user_uid           81
-%define _default_path_fuzz      999
+%define _default_patch_fuzz     999
 
 Summary: D-BUS message bus
 Name: dbus
