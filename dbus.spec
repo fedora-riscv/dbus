@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.2.16
-Release: 8%{?dist}
+Release: 9%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
 Source1: doxygen_to_devhelp.xsl
@@ -48,6 +48,20 @@ Patch2: fix-timeout-accounting.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=518541
 Patch3: dbus-1.2.16-capability.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=545267
+# http://bugs.freedesktop.org/25642
+Patch4: fix-reload-leak.patch
+
+# http://bugs.freedesktop.org/25697
+Patch5: fix-daemon-activation.patch
+
+# http://bugs.freedesktop.org/24350
+Patch6: keep-pending-activations.patch
+
+# http://bugs.freedesktop.org/21597
+Patch7: fix-reload-race.patch
+
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -104,6 +118,10 @@ in this separate package so server systems need not install X.
 %patch1 -p1 -b .generate-xml-docs
 %patch2 -p1 -b .fix-timeout-accounting
 %patch3 -p1 -b .capability
+%patch4 -p1 -b .fix-reload-leak
+%patch5 -p1 -b .fix-daemon-activation
+%patch6 -p1 -b .keep-pending-activations
+%patch7 -p1 -b .fix-reload-race
 
 autoreconf -f -i
 
@@ -240,6 +258,12 @@ fi
 %{_includedir}/*
 
 %changelog
+* Fri Dec 18 2009 Ray Strode <rstrode@redhat.com> - 1:1.2.16-9
+- Fix activation of daemons (#545267)
+- Fix reload memleak (fdo #24697)
+- Don't forget about pending activations on reload (fdo #24350)
+- Fix reload race (fdo #21597)
+
 * Wed Oct  7 2009 Matthias Clasen <mclasen@redhat.com> - 1:1.2.16-8
 - Drop capabilities (#518541)
 
