@@ -1,0 +1,292 @@
+From c4371e4bc8a561cf91516d22f00c9512dc7e8e53 Mon Sep 17 00:00:00 2001
+From: Colin Walters <walters@verbum.org>
+Date: Sun, 21 Mar 2010 07:01:15 -0400
+Subject: [PATCH 1/3] [bus] While creating a syslog, correctly get pointer data from DBusString
+
+---
+ bus/bus.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/bus/bus.c b/bus/bus.c
+index 3e37e90..60de72a 100644
+--- a/bus/bus.c
++++ b/bus/bus.c
+@@ -1196,7 +1196,7 @@ bus_context_log (BusContext *context, DBusSystemLogSeverity severity, const char
+       if (!_dbus_string_append_printf_valist (&full_msg, msg, args))
+         goto oom_out;
+ 
+-      _dbus_system_log (severity, "%s", full_msg);
++      _dbus_system_log (severity, "%s", _dbus_string_get_const_data (&full_msg));
+     oom_out:
+       _dbus_string_free (&full_msg);
+     }
+-- 
+1.6.6.1
+
+
+From 03bb3ce656e9b14fe643572dd0d39f82e955f1f5 Mon Sep 17 00:00:00 2001
+From: Colin Walters <walters@verbum.org>
+Date: Mon, 22 Mar 2010 10:38:12 -0400
+Subject: [PATCH 2/3] Add DBUS_GNUC_PRINTF checks to new formatting functions
+
+Otherwise we don't get GCC warnings.
+---
+ bus/bus.c           |    3 +++
+ dbus/dbus-sysdeps.h |    2 +-
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/bus/bus.c b/bus/bus.c
+index 60de72a..fd8a872 100644
+--- a/bus/bus.c
++++ b/bus/bus.c
+@@ -1176,6 +1176,9 @@ bus_context_get_reply_timeout (BusContext *context)
+ }
+ 
+ void
++bus_context_log (BusContext *context, DBusSystemLogSeverity severity, const char *msg, ...) _DBUS_GNUC_PRINTF (3, 4);
++
++void
+ bus_context_log (BusContext *context, DBusSystemLogSeverity severity, const char *msg, ...)
+ {
+   va_list args;
+diff --git a/dbus/dbus-sysdeps.h b/dbus/dbus-sysdeps.h
+index 12e9124..7817e04 100644
+--- a/dbus/dbus-sysdeps.h
++++ b/dbus/dbus-sysdeps.h
+@@ -446,7 +446,7 @@ typedef enum {
+   DBUS_SYSTEM_LOG_FATAL
+ } DBusSystemLogSeverity;
+ 
+-void _dbus_system_log (DBusSystemLogSeverity severity, const char *msg, ...);
++void _dbus_system_log (DBusSystemLogSeverity severity, const char *msg, ...) _DBUS_GNUC_PRINTF (2, 3);
+ void _dbus_system_logv (DBusSystemLogSeverity severity, const char *msg, va_list args);
+ 
+ /* Define DBUS_VA_COPY() to do the right thing for copying va_list variables.
+-- 
+1.6.6.1
+
+
+From c93d3ec2ff13f31291c56f6d5d4f7a77ecdb5ea7 Mon Sep 17 00:00:00 2001
+From: Colin Walters <walters@lightbox.localdomain>
+Date: Mon, 22 Mar 2010 11:50:24 -0400
+Subject: [PATCH 3/3] Add DBUS_INT64_MODIFIER define, turn on -Wformat
+
+https://bugs.freedesktop.org/show_bug.cgi?id=19195
+
+We were previously using -Wno-format because we didn't have
+a #define for DBUS_INT64_MODIFIER, which was really lame because
+it easily hid problems.
+
+For now, just define it if we're on glibc; this is obviously
+not strictly correct but it's safe, because the formatting
+is only used in DBUS_VERBOSE mode, and in tools/dbus-monitor.
+Ideally we get the the glib code relicensed.
+---
+ configure.in                       |   45 +++++++++++++++++++++++++++++++----
+ dbus/dbus-connection.c             |    2 +-
+ dbus/dbus-credentials.c            |    4 +-
+ dbus/dbus-marshal-basic.c          |   10 +------
+ dbus/dbus-marshal-recursive-util.c |    4 +-
+ tools/dbus-print-message.c         |    9 +++++-
+ 6 files changed, 53 insertions(+), 21 deletions(-)
+
+diff --git a/configure.in b/configure.in
+index 074472f..3fae835 100644
+--- a/configure.in
++++ b/configure.in
+@@ -146,6 +146,31 @@ if test x$enable_gcov = xyes; then
+ fi
+ AM_CONDITIONAL(DBUS_GCOV_ENABLED, test x$enable_gcov = xyes)
+ 
++# glibc21.m4 serial 3
++dnl Copyright (C) 2000-2002, 2004 Free Software Foundation, Inc.
++dnl This file is free software; the Free Software Foundation
++dnl gives unlimited permission to copy and/or distribute it,
++dnl with or without modifications, as long as this notice is preserved.
++
++# Test for the GNU C Library, version 2.1 or newer.
++# From Bruno Haible.
++
++AC_CACHE_CHECK(whether we are using the GNU C Library 2.1 or newer,
++  ac_cv_gnu_library_2_1,
++  [AC_EGREP_CPP([Lucky GNU user],
++    [
++#include <features.h>
++#ifdef __GNU_LIBRARY__
++ #if (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 1) || (__GLIBC__ > 2)
++  Lucky GNU user
++ #endif
++#endif
++    ],
++    ac_cv_gnu_library_2_1=yes,
++    ac_cv_gnu_library_2_1=no)
++  ]
++)
++
+ #### Integer sizes 
+ 
+ AC_CHECK_SIZEOF(char)
+@@ -164,21 +189,32 @@ $ac_cv_sizeof_int)
+   dbusint64=int
+   dbusint64_constant='(val)'
+   dbusuint64_constant='(val)'
++  dbusint64_printf_modifier='""'
+   ;;
+ $ac_cv_sizeof_long)
+   dbusint64=long
+   dbusint64_constant='(val##L)'
+   dbusuint64_constant='(val##UL)'
++  dbusint64_printf_modifier='"l"'
+   ;;
+ $ac_cv_sizeof_long_long)
+   dbusint64='long long'
+   dbusint64_constant='(val##LL)'
+   dbusuint64_constant='(val##ULL)'
++  # Ideally we discover what the format is, but this is
++  # only used in verbose mode, so eh...
++  if test x"$ac_cv_gnu_library_2_1" = xyes; then
++    dbusint64_printf_modifier='"ll"'
++  fi
+   ;;
+ $ac_cv_sizeof___int64)
+   dbusint64=__int64
+   dbusint64_constant='(val##i64)'
+   dbusuint64_constant='(val##ui64)'
++  # See above case
++  if test x"$ac_cv_gnu_library_2_1" = xyes; then
++    dbusint64_printf_modifier='"ll"'
++  fi
+   ;;
+ esac
+ 
+@@ -193,6 +229,9 @@ else
+         DBUS_HAVE_INT64=1
+         DBUS_INT64_CONSTANT="$dbusint64_constant"
+         DBUS_UINT64_CONSTANT="$dbusuint64_constant"
++	if test x"$dbusint64_printf_modifier" != x; then
++		AC_DEFINE_UNQUOTED(DBUS_INT64_PRINTF_MODIFIER, [$dbusint64_printf_modifier], [Define to printf modifier for 64 bit integer type])
++	fi
+         AC_MSG_RESULT($DBUS_INT64_TYPE)
+ fi
+ 
+@@ -1089,12 +1128,6 @@ if test "x$GCC" = "xyes"; then
+         CFLAGS="$CFLAGS -Wno-pointer-sign"
+      fi
+      ;;
+-  esac  
+-  
+-  # http://bugs.freedesktop.org/show_bug.cgi?id=19195
+-  case " $CFLAGS " in
+-  *[\ \	]-Wno-format[\ \	]*) ;;
+-  *) CFLAGS="$CFLAGS -Wno-format" ;;
+   esac
+   
+   # This one is special - it's not a warning override.
+diff --git a/dbus/dbus-connection.c b/dbus/dbus-connection.c
+index 69fdf53..9526d3c 100644
+--- a/dbus/dbus-connection.c
++++ b/dbus/dbus-connection.c
+@@ -2434,7 +2434,7 @@ _dbus_connection_block_pending_call (DBusPendingCall *pending)
+       goto recheck_status;
+     }
+ 
+-  _dbus_verbose ("dbus_connection_send_with_reply_and_block(): Waited %ld milliseconds and got no reply\n",
++  _dbus_verbose ("dbus_connection_send_with_reply_and_block(): Waited %d milliseconds and got no reply\n",
+                  elapsed_milliseconds);
+ 
+   _dbus_assert (!_dbus_pending_call_get_completed_unlocked (pending));
+diff --git a/dbus/dbus-credentials.c b/dbus/dbus-credentials.c
+index 889166b..50a0548 100644
+--- a/dbus/dbus-credentials.c
++++ b/dbus/dbus-credentials.c
+@@ -519,13 +519,13 @@ _dbus_credentials_to_string_append (DBusCredentials    *credentials,
+   join = FALSE;
+   if (credentials->unix_uid != DBUS_UID_UNSET)
+     {
+-      if (!_dbus_string_append_printf (string, "uid=%d", credentials->unix_uid))
++      if (!_dbus_string_append_printf (string, "uid=%d", (int) credentials->unix_uid))
+         goto oom;
+       join = TRUE;
+     }
+   if (credentials->unix_pid != DBUS_PID_UNSET)
+     {
+-      if (!_dbus_string_append_printf (string, "%spid=%d", join ? " " : "", credentials->unix_pid))
++      if (!_dbus_string_append_printf (string, "%spid=%d", join ? " " : "", (int) credentials->unix_pid))
+         goto oom;
+       join = TRUE;
+     }
+diff --git a/dbus/dbus-marshal-basic.c b/dbus/dbus-marshal-basic.c
+index 52308cb..3d0d3d0 100644
+--- a/dbus/dbus-marshal-basic.c
++++ b/dbus/dbus-marshal-basic.c
+@@ -1386,16 +1386,10 @@ _dbus_verbose_bytes (const unsigned char *data,
+           if (i > 7 &&
+               _DBUS_ALIGN_ADDRESS (&data[i], 8) == &data[i])
+             {
+-#ifdef DBUS_HAVE_INT64
+-              /* I think I probably mean "GNU libc printf" and not "GNUC"
+-               * but we'll wait until someone complains. If you hit this,
+-               * just turn off verbose mode as a workaround.
+-               */
+-#if __GNUC__
+-              _dbus_verbose (" u64: 0x%llx",
++#ifdef DBUS_INT64_PRINTF_MODIFIER
++              _dbus_verbose (" u64: 0x%" DBUS_INT64_PRINTF_MODIFIER "x",
+                              *(dbus_uint64_t*)&data[i-8]);
+ #endif
+-#endif
+               _dbus_verbose (" dbl: %g",
+                              *(double*)&data[i-8]);
+             }
+diff --git a/dbus/dbus-marshal-recursive-util.c b/dbus/dbus-marshal-recursive-util.c
+index f87644c..f4d59f3 100644
+--- a/dbus/dbus-marshal-recursive-util.c
++++ b/dbus/dbus-marshal-recursive-util.c
+@@ -2651,8 +2651,8 @@ double_read_value (TestTypeNode   *node,
+ 
+   if (!_DBUS_DOUBLES_BITWISE_EQUAL (v, expected))
+     {
+-#ifdef DBUS_HAVE_INT64
+-      _dbus_warn ("Expected double %g got %g\n bits = 0x%llx vs.\n bits = 0x%llx)\n",
++#ifdef DBUS_INT64_PRINTF_MODIFIER
++      _dbus_warn ("Expected double %g got %g\n bits = 0x%" DBUS_INT64_PRINTF_MODIFIER "x vs.\n bits = 0x%" DBUS_INT64_PRINTF_MODIFIER "x)\n",
+                   expected, v,
+                   *(dbus_uint64_t*)(char*)&expected,
+                   *(dbus_uint64_t*)(char*)&v);
+diff --git a/tools/dbus-print-message.c b/tools/dbus-print-message.c
+index 8a8e351..cac4041 100644
+--- a/tools/dbus-print-message.c
++++ b/tools/dbus-print-message.c
+@@ -22,6 +22,7 @@
+ #include "dbus-print-message.h"
+ 
+ #include <stdlib.h>
++#include "config.h"
+ 
+ static const char*
+ type_to_name (int message_type)
+@@ -225,7 +226,9 @@ print_iter (DBusMessageIter *iter, dbus_bool_t literal, int depth)
+ 	  {
+ 	    dbus_int64_t val;
+ 	    dbus_message_iter_get_basic (iter, &val);
+-	    printf ("int64 %lld\n", val);
++#ifdef DBUS_INT64_PRINTF_MODIFIER
++	    printf ("int64 %" DBUS_INT64_PRINTF_MODIFIER "d\n", val);
++#endif
+ 	    break;
+ 	  }
+ 
+@@ -233,7 +236,9 @@ print_iter (DBusMessageIter *iter, dbus_bool_t literal, int depth)
+ 	  {
+ 	    dbus_uint64_t val;
+ 	    dbus_message_iter_get_basic (iter, &val);
+-	    printf ("uint64 %llu\n", val);
++#ifdef DBUS_INT64_PRINTF_MODIFIER
++	    printf ("uint64 %" DBUS_INT64_PRINTF_MODIFIER "u\n", val);
++#endif
+ 	    break;
+ 	  }
+ 
+-- 
+1.6.6.1
+
