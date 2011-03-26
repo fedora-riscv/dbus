@@ -10,7 +10,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -45,6 +45,9 @@ Conflicts: cups < 1:1.1.20-4
 Patch0: bindir.patch
 # Not sure about this one
 Patch1: dbus-1.0.1-generate-xml-docs.patch
+
+# https://bugs.freedesktop.org/show_bug.cgi?id=35705
+Patch2: activation-logging.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -242,6 +245,10 @@ fi
 %{_includedir}/*
 
 %changelog
+* Sat Mar 26 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-2
+- Add patch to log activation; we're trying to debug a potential
+  bluez failure, and we really needed this before anyways.
+
 * Wed Feb 23 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-1
 - New upstream version
 

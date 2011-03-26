@@ -1,0 +1,103 @@
+From abfdde4255a1de97f565fb04c9a04a894b71c370 Mon Sep 17 00:00:00 2001
+From: Colin Walters <walters@verbum.org>
+Date: Sat, 26 Mar 2011 15:52:50 -0400
+Subject: [PATCH] activation: Use _dbus_system_log for activation information
+
+Log when we are activating something (and whether it's via systemd)
+as well as when we fail to activate.
+---
+ bus/activation.c |   56 ++++++++++++++++++++++++++++++++++++++++-------------
+ 1 files changed, 42 insertions(+), 14 deletions(-)
+
+diff --git a/bus/activation.c b/bus/activation.c
+index 7b2a72b..27a8ccc 100644
+--- a/bus/activation.c
++++ b/bus/activation.c
+@@ -1400,6 +1400,11 @@ babysitter_watch_callback (DBusWatch     *watch,
+ 
+       if (activation_failed)
+         {
++          bus_context_log (pending_activation->activation->context,
++                           DBUS_SYSTEM_LOG_INFO, "Activated service '%s' failed: %s",
++                           pending_activation->service_name,
++                           error.message);
++
+           /* Destroy all pending activations with the same exec */
+           _dbus_hash_iter_init (pending_activation->activation->pending_activations,
+                                 &iter);
+@@ -1462,6 +1467,10 @@ pending_activation_timed_out (void *data)
+   dbus_set_error (&error, DBUS_ERROR_TIMED_OUT,
+                   "Activation of %s timed out",
+                   pending_activation->service_name);
++  bus_context_log (pending_activation->activation->context,
++                   DBUS_SYSTEM_LOG_INFO,
++                   "Activation of service '%s' timed out",
++                   pending_activation->service_name);
+ 
+   pending_activation_failed (pending_activation, &error);
+ 
+@@ -1976,9 +1985,15 @@ bus_activation_activate_service (BusActivation  *activation,
+           service = bus_registry_lookup (registry, &service_string);
+ 
+           if (service != NULL)
+-            /* Wonderful, systemd is connected, let's just send the msg */
+-            retval = bus_dispatch_matches (activation_transaction, NULL, bus_service_get_primary_owners_connection (service),
+-                                           message, error);
++            {
++              bus_context_log (activation->context,
++                               DBUS_SYSTEM_LOG_INFO, "Activating via systemd service name='%s' unit='%s'",
++                               service_name,
++                               entry->systemd_service);
++              /* Wonderful, systemd is connected, let's just send the msg */
++              retval = bus_dispatch_matches (activation_transaction, NULL, bus_service_get_primary_owners_connection (service),
++                                             message, error);
++            }
+           else
+             /* systemd is not around, let's "activate" it. */
+             retval = bus_activation_activate_service (activation, connection, activation_transaction, TRUE,
+@@ -2083,18 +2098,31 @@ bus_activation_activate_service (BusActivation  *activation,
+     }
+ 
+   _dbus_verbose ("Spawning %s ...\n", argv[0]);
+-  if (!_dbus_spawn_async_with_babysitter (&pending_activation->babysitter, argv,
+-                                          envp,
+-                                          NULL, activation,
+-                                          error))
+-    {
+-      _dbus_verbose ("Failed to spawn child\n");
+-      _DBUS_ASSERT_ERROR_IS_SET (error);
+-      dbus_free_string_array (argv);
+-      dbus_free_string_array (envp);
++  bus_context_log (activation->context,
++                   DBUS_SYSTEM_LOG_INFO, "Activating service '%s'",
++                   service_name);
++  {
++    DBusError tmp_error;
++    dbus_error_init (&tmp_error);
++
++    if (!_dbus_spawn_async_with_babysitter (&pending_activation->babysitter, argv,
++                                            envp,
++                                            NULL, activation,
++                                            &tmp_error))
++      {
++        _dbus_verbose ("Failed to spawn child\n");
++        bus_context_log (activation->context,
++                         DBUS_SYSTEM_LOG_INFO, "Failed to activate service %s: %s",
++                         service_name,
++                         tmp_error.message);
++        _DBUS_ASSERT_ERROR_IS_SET (&tmp_error);
++        dbus_move_error (&tmp_error, error);
++        dbus_free_string_array (argv);
++        dbus_free_string_array (envp);
+ 
+-      return FALSE;
+-    }
++        return FALSE;
++      }
++  }
+ 
+   dbus_free_string_array (argv);
+   envp = NULL;
+-- 
+1.7.4
+
