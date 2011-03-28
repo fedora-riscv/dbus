@@ -10,7 +10,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -47,7 +47,9 @@ Patch0: bindir.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
 
 # https://bugs.freedesktop.org/show_bug.cgi?id=35705
-Patch2: activation-logging.patch
+Patch2: 0001-activation-Use-_dbus_system_log-for-activation-infor.patch
+# https://bugs.freedesktop.org/show_bug.cgi?id=35750
+Patch3: 0001-activation-Strip-out-code-to-compare-by-Exec.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -101,6 +103,8 @@ in this separate package so server systems need not install X.
 
 %patch0 -p1 -b .bindir
 %patch1 -p1 -b .generate-xml-docs
+%patch2 -p1
+%patch3 -p1
 
 autoreconf -f -i
 
@@ -245,6 +249,10 @@ fi
 %{_includedir}/*
 
 %changelog
+* Mon Mar 28 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-3
+- Update activation patch, add one to fix Exec comparison
+  See https://bugzilla.gnome.org/show_bug.cgi?id=645756
+
 * Sat Mar 26 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-2
 - Add patch to log activation; we're trying to debug a potential
   bluez failure, and we really needed this before anyways.
