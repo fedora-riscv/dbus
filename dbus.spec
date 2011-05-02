@@ -10,7 +10,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -249,6 +249,10 @@ fi
 %{_includedir}/*
 
 %changelog
+* Mon May  2 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-4
+- Update activation logging patch to what's upstream; don't log when
+  something is already activated (#701055)
+
 * Mon Mar 28 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-3
 - Update activation patch, add one to fix Exec comparison
   See https://bugzilla.gnome.org/show_bug.cgi?id=645756

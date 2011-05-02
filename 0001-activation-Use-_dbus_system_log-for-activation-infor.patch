@@ -1,16 +1,18 @@
-From baf1541314e11b69c7faf6a3fcd05c1006695b51 Mon Sep 17 00:00:00 2001
+From 1d24cecc41296647b14175779a35c2cdc4d242a7 Mon Sep 17 00:00:00 2001
 From: Colin Walters <walters@verbum.org>
 Date: Sat, 26 Mar 2011 15:52:50 -0400
 Subject: [PATCH] activation: Use _dbus_system_log for activation information
 
 Log when we are activating something (and whether it's via systemd)
 as well as when we fail to activate, and when one succeeds.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=35705
 ---
- bus/activation.c |   87 +++++++++++++++++++++++++++++++++++++++++++----------
- 1 files changed, 70 insertions(+), 17 deletions(-)
+ bus/activation.c |   68 +++++++++++++++++++++++++++++++++++++++++++++++------
+ 1 files changed, 60 insertions(+), 8 deletions(-)
 
 diff --git a/bus/activation.c b/bus/activation.c
-index ab6ef51..9cad01f 100644
+index ab6ef51..3177d02 100644
 --- a/bus/activation.c
 +++ b/bus/activation.c
 @@ -1106,6 +1106,10 @@ bus_activation_service_created (BusActivation  *activation,
@@ -47,18 +49,15 @@ index ab6ef51..9cad01f 100644
  
    pending_activation_failed (pending_activation, &error);
  
-@@ -1714,6 +1727,10 @@ bus_activation_activate_service (BusActivation  *activation,
-         {
-           dbus_uint32_t result;
- 
-+          bus_context_log (activation->context,
-+                           DBUS_SYSTEM_LOG_INFO, "Service '%s' is already active",
-+                           service_name);
-+
-           _dbus_verbose ("Service \"%s\" is already active\n", service_name);
- 
-           message = dbus_message_new_method_return (activation_message);
-@@ -1962,18 +1979,34 @@ bus_activation_activate_service (BusActivation  *activation,
+@@ -1674,6 +1687,7 @@ bus_activation_activate_service (BusActivation  *activation,
+                                  const char     *service_name,
+                                  DBusError      *error)
+ {
++  DBusError tmp_error;
+   BusActivationEntry *entry;
+   BusPendingActivation *pending_activation;
+   BusPendingActivationEntry *pending_activation_entry;
+@@ -1962,18 +1976,34 @@ bus_activation_activate_service (BusActivation  *activation,
            service = bus_registry_lookup (registry, &service_string);
  
            if (service != NULL)
@@ -67,7 +66,7 @@ index ab6ef51..9cad01f 100644
 -                                           message, error);
 +            {
 +              bus_context_log (activation->context,
-+                               DBUS_SYSTEM_LOG_INFO, "Activating via systemd service name='%s' unit='%s'",
++                               DBUS_SYSTEM_LOG_INFO, "Activating via systemd: service name='%s' unit='%s'",
 +                               service_name,
 +                               entry->systemd_service);
 +              /* Wonderful, systemd is connected, let's just send the msg */
@@ -80,7 +79,7 @@ index ab6ef51..9cad01f 100644
 -                                                      message, "org.freedesktop.systemd1", error);
 +            {
 +              bus_context_log (activation->context,
-+                               DBUS_SYSTEM_LOG_INFO, "Activating systemd to hand-off service name='%s' unit='%s'",
++                               DBUS_SYSTEM_LOG_INFO, "Activating systemd to hand-off: service name='%s' unit='%s'",
 +                               service_name,
 +                               entry->systemd_service);
 +              /* systemd is not around, let's "activate" it. */
@@ -93,57 +92,45 @@ index ab6ef51..9cad01f 100644
            if (!retval)
              {
 +              bus_context_log (activation->context,
-+                               DBUS_SYSTEM_LOG_INFO, "Failed to activate via systemd service name='%s' unit='%s'",
++                               DBUS_SYSTEM_LOG_INFO, "Failed to activate via systemd: service name='%s' unit='%s'",
 +                               service_name,
 +                               entry->systemd_service);
                _DBUS_ASSERT_ERROR_IS_SET (error);
                _dbus_verbose ("failed to send activation message: %s\n", error->name);
                bus_transaction_cancel_and_free (activation_transaction);
-@@ -2069,18 +2102,32 @@ bus_activation_activate_service (BusActivation  *activation,
+@@ -2069,13 +2099,29 @@ bus_activation_activate_service (BusActivation  *activation,
      }
  
    _dbus_verbose ("Spawning %s ...\n", argv[0]);
--  if (!_dbus_spawn_async_with_babysitter (&pending_activation->babysitter, argv,
--                                          envp,
--                                          NULL, activation,
--                                          error))
--    {
--      _dbus_verbose ("Failed to spawn child\n");
--      _DBUS_ASSERT_ERROR_IS_SET (error);
--      dbus_free_string_array (argv);
--      dbus_free_string_array (envp);
-+  bus_context_log (activation->context,
-+                   DBUS_SYSTEM_LOG_INFO, "Activating service name='%s' argv0='%s'",
-+                   service_name,
-+                   argv[0]);
-+  {
-+    DBusError tmp_error;
-+    dbus_error_init (&tmp_error);
++  if (servicehelper != NULL)
++    bus_context_log (activation->context,
++                     DBUS_SYSTEM_LOG_INFO, "Activating service name='%s' (using servicehelper)",
++                     service_name);
++  else
++    bus_context_log (activation->context,
++                     DBUS_SYSTEM_LOG_INFO, "Activating service name='%s'",
++                     service_name);
 +
-+    if (!_dbus_spawn_async_with_babysitter (&pending_activation->babysitter, argv,
-+                                            envp,
-+                                            NULL, activation,
-+                                            &tmp_error))
-+      {
-+        _dbus_verbose ("Failed to spawn child\n");
-+        bus_context_log (activation->context,
-+                         DBUS_SYSTEM_LOG_INFO, "Failed to activate service %s: %s",
-+                         service_name,
-+                         tmp_error.message);
-+        _DBUS_ASSERT_ERROR_IS_SET (&tmp_error);
-+        dbus_move_error (&tmp_error, error);
-+        dbus_free_string_array (argv);
-+        dbus_free_string_array (envp);
++  dbus_error_init (&tmp_error);
++
+   if (!_dbus_spawn_async_with_babysitter (&pending_activation->babysitter, argv,
+                                           envp,
+                                           NULL, activation,
+-                                          error))
++                                          &tmp_error))
+     {
+       _dbus_verbose ("Failed to spawn child\n");
+-      _DBUS_ASSERT_ERROR_IS_SET (error);
++      bus_context_log (activation->context,
++                       DBUS_SYSTEM_LOG_INFO, "Failed to activate service %s: %s",
++                       service_name,
++                       tmp_error.message);
++      _DBUS_ASSERT_ERROR_IS_SET (&tmp_error);
++      dbus_move_error (&tmp_error, error);
+       dbus_free_string_array (argv);
+       dbus_free_string_array (envp);
  
--      return FALSE;
--    }
-+        return FALSE;
-+      }
-+  }
- 
-   dbus_free_string_array (argv);
-   envp = NULL;
-@@ -2166,10 +2213,16 @@ dbus_activation_systemd_failure (BusActivation *activation,
+@@ -2166,10 +2212,16 @@ dbus_activation_systemd_failure (BusActivation *activation,
                               DBUS_TYPE_INVALID))
      dbus_set_error(&error, code, str);
  
@@ -161,5 +148,5 @@ index ab6ef51..9cad01f 100644
                              &iter);
  
 -- 
-1.7.4.1
+1.7.4.4
 
