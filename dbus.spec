@@ -10,7 +10,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -47,6 +47,10 @@ Patch0: bindir.patch
 Patch1: dbus-1.0.1-generate-xml-docs.patch
 
 Patch2: CVE-2010-4352.patch
+
+# CVE 2011-2200
+Patch3: 0001-_dbus_header_byteswap-change-the-first-byte-of-the-m.patch
+Patch4: 0001-dbus_message_demarshal_bytes_needed-correct-a-wrong-.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -101,6 +105,8 @@ in this separate package so server systems need not install X.
 %patch0 -p1 -b .bindir
 %patch1 -p1 -b .generate-xml-docs
 %patch2 -p1
+%patch3 -p1
+%patch4 -p1
 
 autoreconf -f -i
 
@@ -245,6 +251,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu Jul 28 2011 Colin Walters <walters@verbum.org> - 1:1.4.0-3
+- CVE-2011-2200
+
 * Mon Dec 20 2010 Colin Walters <walters@verbum.org> - 1:1.4.0-2
 - CVE-2010-4352
 
