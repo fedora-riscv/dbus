@@ -9,7 +9,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.6
-Release: 4%{?dist}
+Release: 5%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -49,6 +49,10 @@ Patch1: dbus-1.0.1-generate-xml-docs.patch
 Patch2: 0001-activation-Use-_dbus_system_log-for-activation-infor.patch
 # https://bugs.freedesktop.org/show_bug.cgi?id=35750
 Patch3: 0001-activation-Strip-out-code-to-compare-by-Exec.patch
+
+# CVE 2011-2200
+Patch4: 0001-_dbus_header_byteswap-change-the-first-byte-of-the-m.patch
+Patch5: 0001-dbus_message_demarshal_bytes_needed-correct-a-wrong-.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -104,6 +108,8 @@ in this separate package so server systems need not install X.
 %patch1 -p1 -b .generate-xml-docs
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
+%patch5 -p1
 
 autoreconf -f -i
 
@@ -248,6 +254,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Wed Jul 27 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-5
+- Merge fixes from upstream for CVE-2011-2200
+
 * Mon May  2 2011 Colin Walters <walters@verbum.org> - 1:1.4.6-4
 - Update activation logging patch to what's upstream; don't log when
   something is already activated (#701055)

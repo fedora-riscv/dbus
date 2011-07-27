@@ -1,0 +1,31 @@
+From 90ac05171d018e5d2cc0c3a3195b59425a626f96 Mon Sep 17 00:00:00 2001
+From: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date: Thu, 9 Jun 2011 18:35:43 +0100
+Subject: [PATCH] dbus_message_demarshal_bytes_needed: correct a wrong
+ assertion
+
+It's entirely possible for a message to indicate how many bytes we need,
+without actually being complete.
+
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=38120
+Reviewed-by: Will Thompson <will.thompson@collabora.co.uk>
+---
+ dbus/dbus-message.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dbus/dbus-message.c b/dbus/dbus-message.c
+index 24ef5ac..a59ed9b 100644
+--- a/dbus/dbus-message.c
++++ b/dbus/dbus-message.c
+@@ -4680,7 +4680,7 @@ dbus_message_demarshal_bytes_needed(const char *buf,
+ 
+   if (validity == DBUS_VALID)
+     {
+-      _dbus_assert(have_message);
++      _dbus_assert (have_message || (header_len + body_len) > len);
+       return header_len + body_len;
+     }
+   else
+-- 
+1.7.6
+
