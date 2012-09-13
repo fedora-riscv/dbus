@@ -10,7 +10,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.10
-Release: 4%{?dist}
+Release: 5%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -43,6 +43,8 @@ Conflicts: cups < 1:1.1.20-4
 
 # FIXME this should be upstreamed; need --daemon-bindir=/bin and --bindir=/usr/bin or something?
 Patch0: bindir.patch
+# CVE-2012-3524
+Patch1: 0001-CVE-2012-3524-Don-t-access-environment-variables-or-.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -94,6 +96,7 @@ in this separate package so server systems need not install X.
 /bin/chmod 0644 COPYING ChangeLog NEWS
 
 %patch0 -p1 -b .bindir
+%patch1 -p1
 
 autoreconf -f -i
 
@@ -226,6 +229,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu Sep 13 2012 Colin Walters <walters@verbum.org> - 1:1.4.0-5
+- CVE-2012-3524
+
 * Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:1.4.10-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
