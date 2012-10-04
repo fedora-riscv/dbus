@@ -10,7 +10,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.10
-Release: 5%{?dist}
+Release: 6%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -131,6 +131,7 @@ rm -f %{buildroot}/%{_lib}/*.la
 install -D -m755 %{SOURCE2} %{buildroot}%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
 
 mkdir -p %{buildroot}%{_datadir}/dbus-1/interfaces
+mkdir -p %{buildroot}%{_localstatedir}/lib/dbus/
 
 # Make sure that when somebody asks for D-Bus under the name of the
 # old SysV script, that he ends up with the standard dbus.service name
@@ -229,6 +230,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu Oct  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 1:1.4.0-6
+- Fix missing run time directory
+
 * Thu Sep 13 2012 Colin Walters <walters@verbum.org> - 1:1.4.0-5
 - CVE-2012-3524
 
