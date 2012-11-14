@@ -10,7 +10,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.4.10
-Release: 6%{?dist}
+Release: 7%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -45,6 +45,11 @@ Conflicts: cups < 1:1.1.20-4
 Patch0: bindir.patch
 # CVE-2012-3524
 Patch1: 0001-CVE-2012-3524-Don-t-access-environment-variables-or-.patch
+# dbus-protocol.h is incompatible with C++11 compilers
+# https://bugzilla.redhat.com/856131
+# https://bugs.freedesktop.org/show_bug.cgi?id=46147
+Patch2: dbus-c++-11.patch
+
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -97,6 +102,7 @@ in this separate package so server systems need not install X.
 
 %patch0 -p1 -b .bindir
 %patch1 -p1
+%patch2 -p1 -b .dbus_c++-11
 
 autoreconf -f -i
 
@@ -106,7 +112,7 @@ COMMON_ARGS="--enable-libaudit --enable-selinux=yes --with-init-scripts=redhat -
 # leave verbose mode so people can debug their apps but make sure to
 # turn it off on stable releases with --disable-verbose-mode
 %configure $COMMON_ARGS --disable-tests --disable-asserts --enable-doxygen-docs --enable-xml-docs --with-systemdsystemunitdir=/lib/systemd/system/
-make
+make %{?_smp_mflags} V=1
 
 %install
 rm -rf %{buildroot}
@@ -206,7 +212,7 @@ fi
 
 %files libs
 %defattr(-,root,root,-)
-/%{_lib}/*dbus-1*.so.*
+/%{_lib}/libdbus-1.so.3*
 
 %files x11
 %defattr(-,root,root)
@@ -218,22 +224,28 @@ fi
 %files doc
 %defattr(-,root,root)
 %doc doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
-%doc %{_datadir}/doc/dbus/api
+%doc %{_datadir}/doc/dbus/
 
 %files devel
 %defattr(-,root,root)
 
-/%{_lib}/lib*.so
-%dir %{_libdir}/dbus-1.0
+/%{_lib}/libdbus-1.so
+%dir %{_libdir}/dbus-1.0/
 %{_libdir}/dbus-1.0/include/
 %{_libdir}/pkgconfig/dbus-1.pc
-%{_includedir}/*
+%{_includedir}/dbus-1.0/
 
 %changelog
-* Thu Oct  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 1:1.4.0-6
+* Wed Nov 14 2012 Rex Dieter <rdieter@fedoraproject.org> - 1:1.4.10-7
+- dbus-protocol.h is incompatible with C++11 compilers (#856131, fdo#46147)
+- tighten %%files
+- %%changelog: fix typos
+- %%build: make verbose, use %%_smp_mflags
+
+* Thu Oct  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 1:1.4.10-6
 - Fix missing run time directory
 
-* Thu Sep 13 2012 Colin Walters <walters@verbum.org> - 1:1.4.0-5
+* Thu Sep 13 2012 Colin Walters <walters@verbum.org> - 1:1.4.10-5
 - CVE-2012-3524
 
 * Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:1.4.10-4
