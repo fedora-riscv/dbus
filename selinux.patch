@@ -1,0 +1,99 @@
+From 184d8ae4ed26c1279b732c52191914bcb4962388 Mon Sep 17 00:00:00 2001
+From: osmond sun <osmond.sun@gmail.com>
+Date: Wed, 6 Nov 2013 00:53:18 +0800
+Subject: [PATCH] Use selinux_set_mapping() to create a mapping from class/perm
+ indices and the policy values
+
+Let D-Bus uses selinux_set_mapping() instead of the hard coded value
+from flask.h and av_permission.h. In this way, It can create a mapping
+from arbitrary class/perm indices used by D-Bus and the policy values
+and handles all the translation at runtime on avc_has_perm() calls.
+---
+ bus/bus.c     |  2 +-
+ bus/selinux.c | 19 ++++++++++++++++---
+ bus/selinux.h | 12 ++++++++++++
+ 3 files changed, 29 insertions(+), 4 deletions(-)
+
+diff --git a/bus/bus.c b/bus/bus.c
+index e80e708..521b033 100644
+--- a/bus/bus.c
++++ b/bus/bus.c
+@@ -894,7 +894,7 @@ bus_context_new (const DBusString *config_file,
+ 
+   if (!bus_selinux_full_init ())
+     {
+-      bus_context_log (context, DBUS_SYSTEM_LOG_FATAL, "SELinux enabled but AVC initialization failed; check system log\n");
++      bus_context_log (context, DBUS_SYSTEM_LOG_FATAL, "SELinux enabled but D-Bus initialization failed; check system log\n");
+     }
+ 
+   if (!process_config_postinit (context, parser, error))
+diff --git a/bus/selinux.c b/bus/selinux.c
+index 36287e9..81e54f5 100644
+--- a/bus/selinux.c
++++ b/bus/selinux.c
+@@ -44,8 +44,6 @@
+ #include <syslog.h>
+ #include <selinux/selinux.h>
+ #include <selinux/avc.h>
+-#include <selinux/av_permissions.h>
+-#include <selinux/flask.h>
+ #include <signal.h>
+ #include <stdarg.h>
+ #include <stdio.h>
+@@ -314,8 +312,16 @@ bus_selinux_pre_init (void)
+ #endif
+ }
+ 
++#ifdef HAVE_SELINUX
++static struct security_class_mapping dbus_map[] = {
++  { "dbus", { "acquire_svc", "send_msg", NULL } },
++  { NULL }
++};
++#endif /* HAVE_SELINUX */
++
+ /**
+- * Initialize the user space access vector cache (AVC) for D-Bus and set up
++ * Establish dynamic object class and permission mapping and
++ * initialize the user space access vector cache (AVC) for D-Bus and set up
+  * logging callbacks.
+  */
+ dbus_bool_t
+@@ -334,6 +340,13 @@ bus_selinux_full_init (void)
+ 
+   _dbus_verbose ("SELinux is enabled in this kernel.\n");
+ 
++  if (selinux_set_mapping (dbus_map) < 0)
++    {
++      _dbus_warn ("Failed to set up security class mapping (selinux_set_mapping():%s).\n",
++                   strerror (errno));
++      return FALSE; 
++    }
++
+   avc_entry_ref_init (&aeref);
+   if (avc_init ("avc", &mem_cb, &log_cb, &thread_cb, &lock_cb) < 0)
+     {
+diff --git a/bus/selinux.h b/bus/selinux.h
+index 3bab36d..ab82855 100644
+--- a/bus/selinux.h
++++ b/bus/selinux.h
+@@ -27,6 +27,18 @@
+ #include <dbus/dbus-connection.h>
+ #include "services.h"
+ 
++/*
++ * Private Flask definitions
++ */
++
++/* security dbus class constants */
++#define SECCLASS_DBUS       1
++
++/* dbus's per access vector constants */ 
++#define DBUS__ACQUIRE_SVC   1
++#define DBUS__SEND_MSG      2
++
++
+ dbus_bool_t bus_selinux_pre_init (void);
+ dbus_bool_t bus_selinux_full_init(void);
+ void        bus_selinux_shutdown (void);
+-- 
+1.8.3.1
