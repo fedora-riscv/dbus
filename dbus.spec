@@ -13,7 +13,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.6.12
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -42,6 +42,8 @@ Requires(pre): /usr/sbin/useradd
 
 # FIXME this should be upstreamed; need --daemon-bindir=/bin and --bindir=/usr/bin or something?
 Patch0: bindir.patch
+# fdo#68945; fixed in dbus >= 1.6.14
+Patch1: 0001-_dbus_babysitter_unref-avoid-infinite-loop-if-waitpi.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -91,6 +93,7 @@ in this separate package so server systems need not install X.
 /bin/chmod 0644 COPYING ChangeLog NEWS
 
 %patch0 -p1 -b .bindir
+%patch1 -p1 -b .loop
 
 %build
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
@@ -225,6 +228,9 @@ fi
 %{_includedir}/*
 
 %changelog
+* Mon Nov 11 2013 Dan Williams <dcbw@redhat.com> - 1:1.6.12-2
+- Fix fdo#68945; infinite loop in _dbus_babysitter_unref()
+
 * Mon Jun 17 2013 Colin Walters <walters@verbum.org> - 1:1.6.12-1
 - New upstream release
 - CVE-2013-2168
