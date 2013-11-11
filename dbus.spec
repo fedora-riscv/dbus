@@ -52,7 +52,8 @@ BuildRequires: /usr/bin/Xvfb
 Patch0: bindir.patch
 Patch1: 0001-name-test-Don-t-run-test-autolaunch-if-we-don-t-have.patch
 Patch2: 0001-test-marshal-Ensure-we-use-suitably-aligned-buffers.patch
-Patch3: 0001-_dbus_babysitter_unref-avoid-infinite-loop-if-waitpi.patch
+Patch3: avoid-undefined-7c00ed22d9b5c33f5b33221e906946b11a9bde3b.patch
+Patch4: 0001-_dbus_babysitter_unref-avoid-infinite-loop-if-waitpi.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -105,6 +106,7 @@ in this separate package so server systems need not install X.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
@@ -148,7 +150,7 @@ mkdir -p %{buildroot}/var/lib/dbus
 
 %check
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
-%configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests
+%configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests --enable-developer --with-valgrind
 
 make clean
 # TODO: better script for this...
