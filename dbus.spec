@@ -30,7 +30,7 @@ BuildRequires: libX11-devel
 BuildRequires: libcap-ng-devel
 BuildRequires: gettext
 BuildRequires: doxygen
-BuildRequires: valgrind
+BuildRequires: valgrind-devel
 BuildRequires: xmlto
 BuildRequires: libxslt
 BuildRequires:  systemd-units
