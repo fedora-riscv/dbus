@@ -13,7 +13,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.6.12
-Release: 5%{?dist}
+Release: 6%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -30,6 +30,7 @@ BuildRequires: libX11-devel
 BuildRequires: libcap-ng-devel
 BuildRequires: gettext
 BuildRequires: doxygen
+BuildRequires: valgrind
 BuildRequires: xmlto
 BuildRequires: libxslt
 BuildRequires:  systemd-units
@@ -250,6 +251,10 @@ fi
 %{_includedir}/*
 
 %changelog
+* Mon Dec 18 2013 Colin Walters <walters@redhat.com> - 1:1.6.12-6
+- BR valgrind; was probably not intended to be a dependency by default,
+  but there's really no reason why not to use it.
+
 * Mon Nov 11 2013 Dan Williams <dcbw@redhat.com> - 1:1.6.12-5
 - Fix infinite loop in _dbus_babysitter_unref() (fdo#68945) (rh#1016446)
 
