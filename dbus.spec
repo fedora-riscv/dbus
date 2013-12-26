@@ -1,5 +1,9 @@
 %global _hardened_build 1
 
+%ifarch %{ix86} x86_64 ppc ppc64 s390x %{arm}
+%global has_valgrind 1
+%endif
+
 %define gettext_package dbus
 
 %define expat_version           1.95.5
@@ -13,7 +17,7 @@ Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.6.12
-Release: 7%{?dist}
+Release: 8%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -30,7 +34,9 @@ BuildRequires: libX11-devel
 BuildRequires: libcap-ng-devel
 BuildRequires: gettext
 BuildRequires: doxygen
+%if 0%{?has_valgrind}
 BuildRequires: valgrind-devel
+%endif
 BuildRequires: xmlto
 BuildRequires: libxslt
 BuildRequires:  systemd-units
@@ -151,7 +157,12 @@ mkdir -p %{buildroot}/var/lib/dbus
 
 %check
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
-%configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests --enable-developer --with-valgrind
+%configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests --enable-developer \
+%if 0%{?has_valgrind}
+    --with-valgrind
+%else
+    %{nil}
+%endif
 
 make clean
 # TODO: better script for this...
@@ -251,7 +262,10 @@ fi
 %{_includedir}/*
 
 %changelog
-* Fri Dec 20 2013 Colin Walters <walters@redhat.com>
+* Thu Dec 26 2013 Dan Horák <dan[at]danny.cz> - 1:1.6.12-8
+- valgrind is available only on selected arches
+
+* Fri Dec 20 2013 Colin Walters <walters@redhat.com> - 1:1.6.12-7
 - Disable -Werror for now; the alignment code is right, but I
   do not want to adjust the code right now to fix the warning.
   Just get a build going with the previous code to
