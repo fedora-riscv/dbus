@@ -1,4 +1,5 @@
 %global _hardened_build 1
+%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 %ifarch %{ix86} x86_64 ppc ppc64 s390x %{arm}
 %global has_valgrind 1
@@ -11,13 +12,13 @@
 
 %define dbus_user_uid           81
 
-%define dbus_common_config_opts --enable-libaudit --enable-selinux=yes --with-init-scripts=redhat --with-system-pid-file=%{_localstatedir}/run/messagebus.pid --with-dbus-user=dbus --libdir=/%{_lib} --bindir=/bin --sysconfdir=/etc --exec-prefix=/ --libexecdir=/%{_lib}/dbus-1 --with-systemdsystemunitdir=/lib/systemd/system/ --enable-doxygen-docs --enable-xml-docs --disable-silent-rules --disable-Werror
+%define dbus_common_config_opts --enable-libaudit --enable-selinux=yes --with-init-scripts=redhat --with-system-pid-file=%{_localstatedir}/run/messagebus.pid --with-dbus-user=dbus --libdir=/%{_lib} --bindir=/bin --sysconfdir=/etc --exec-prefix=/ --libexecdir=/%{_lib}/dbus-1 --with-systemdsystemunitdir=/lib/systemd/system/ --docdir=%{_pkgdocdir} --enable-doxygen-docs --enable-xml-docs --disable-silent-rules --disable-Werror
 
 Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
 Version: 1.6.28
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -102,10 +103,6 @@ in this separate package so server systems need not install X.
 %prep
 %setup -q -n %{name}-%{version}
 
-# For some reason upstream ships these files as executable
-# Make sure they are not
-/bin/chmod 0644 COPYING ChangeLog NEWS
-
 %patch0 -p1 -b .bindir
 %patch1 -p1
 
@@ -149,6 +146,9 @@ rm -rf %{buildroot}%{_initrddir}
 
 mkdir -p %{buildroot}/var/lib/dbus
 
+install -pm 644 -t %{buildroot}%{_pkgdocdir} \
+    COPYING doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
+
 %check
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
 %configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests --enable-developer \
@@ -177,7 +177,7 @@ rm -rf %{buildroot}
 # Add the "dbus" user and group
 /usr/sbin/groupadd -r -g %{dbus_user_uid} dbus 2>/dev/null || :
 /usr/sbin/useradd -c 'System message bus' -u %{dbus_user_uid} -g %{dbus_user_uid} \
-	-s /sbin/nologin -r -d '/' dbus 2> /dev/null || :
+    -s /sbin/nologin -r -d '/' dbus 2> /dev/null || :
 
 %post libs -p /sbin/ldconfig
 
@@ -197,7 +197,8 @@ fi
 %files
 %defattr(-,root,root)
 
-%doc COPYING
+%dir %{_pkgdocdir}
+%{_pkgdocdir}/COPYING
 
 %dir %{_sysconfdir}/dbus-1
 %config %{_sysconfdir}/dbus-1/*.conf
@@ -243,8 +244,8 @@ fi
 
 %files doc
 %defattr(-,root,root)
-%doc doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
-%doc %{_datadir}/doc/dbus
+%{_pkgdocdir}/*
+%exclude %{_pkgdocdir}/COPYING
 
 %files devel
 %defattr(-,root,root)
@@ -256,6 +257,10 @@ fi
 %{_includedir}/*
 
 %changelog
+* Tue Jan 21 2014 Ville Skyttä <ville.skytta@iki.fi> - 1:1.6.28-2
+- Adapt to unversioned docdirs; don't ship all docs in main package.
+- Fix bogus dates in %%changelog and tabs vs spaces warning.
+
 * Thu Nov 27 2014 David King <amigadave@amigadave.com> - 1:1.6.28-1
 - Update to 1.6.28
 - Fixes CVE-2014-3635 (fd.o#83622)
@@ -281,7 +286,7 @@ fi
   Just get a build going with the previous code to
   Resolves: #1044726
 
-* Mon Dec 18 2013 Colin Walters <walters@redhat.com> - 1:1.6.12-6
+* Wed Dec 18 2013 Colin Walters <walters@redhat.com> - 1:1.6.12-6
 - BR valgrind; was probably not intended to be a dependency by default,
   but there's really no reason why not to use it.
 
@@ -339,7 +344,7 @@ fi
 * Sun Apr 22 2012 Lennart Poettering <lpoetter@redhat.com> - 1:1.4.20-2
 - Make D-Bus work in containers
 
-* Tue Apr 13 2012 Colin Walters <walters@verbum.org>
+* Fri Apr 13 2012 Colin Walters <walters@verbum.org>
 - Update to 1.4.20; closes #806082
 - Ensure /var/lib/dbus exists; this seems to have been
   dropped from upstream build rules.
@@ -373,7 +378,7 @@ fi
 * Thu Jul 29 2010 Lennart Poettering <lpoetter@redhat.com> - 1:1.3.2-0.1.885483%{?dist}
 - Conversion from systemd-install to systemctl
 
-* Wed Jul 9 2010 Lennart Poettering <lpoetter@redhat.com> - 1:1.3.2-0.0.885483
+* Fri Jul 9 2010 Lennart Poettering <lpoetter@redhat.com> - 1:1.3.2-0.0.885483
 - git Snapshot with systemd activation
 
 * Wed Jun 23 2010 Lennart Poettering <lpoetter@redhat.com> - 1:1.3.1-1
@@ -672,7 +677,7 @@ only system will.
 - Update to 0.92
 - remove old patches
 
-* Thu Jul 22 2006 John (J5) Palmieri <johnp@redhat.com> - 0.90-8
+* Sat Jul 22 2006 John (J5) Palmieri <johnp@redhat.com> - 0.90-8
 - add patch to fix timeout removal assertion
 
 * Thu Jul 20 2006 John (J5) Palmieri <johnp@redhat.com> - 0.90-7
@@ -772,7 +777,7 @@ only system will.
 * Thu Dec 01 2005 John (J5) Palmieri <johnp@redhat.com> - 0.60-1
 - upgrade to 0.60
 
-* Mon Sep 08 2005 John (J5) Palmieri <johnp@redhat.com> - 0.50-1
+* Thu Sep 08 2005 John (J5) Palmieri <johnp@redhat.com> - 0.50-1
 - upgrade to 0.50
 
 * Mon Aug 29 2005 John (J5) Palmieri <johnp@redhat.com> - 0.36.2-1
@@ -805,7 +810,7 @@ and those that go into %%{python_sitelib}/dbus (they differ on 64bit)
 - remove dbus-0.32-deadlock-fix.patch
 - remove dbus-0.33-types.patch
 
-* Wed Jun 18 2005 John (J5) Palmieri <johnp@redhat.com> - 0.33-4
+* Wed Jun  8 2005 John (J5) Palmieri <johnp@redhat.com> - 0.33-4
 - Add new libaudit patch from Steve Grub and enable in configure
   (Bug #159218)
 
@@ -820,10 +825,10 @@ uint16's in the python bindings
 - update to upstream 0.33
 - renable selinux audit patch
 
-* Mon Apr 12 2005 John (J5) Palmieri <johnp@redhat.com> - 0.32-6
+* Tue Apr 12 2005 John (J5) Palmieri <johnp@redhat.com> - 0.32-6
 - Added patch to fix deadlocks when using recursive g_mains
 
-* Mon Apr 12 2005 John (J5) Palmieri <johnp@redhat.com> - 0.32-5
+* Tue Apr 12 2005 John (J5) Palmieri <johnp@redhat.com> - 0.32-5
 - replace selinux_init patch with selinux_chroot_workaround patch
   to work around bad selinux interactions when using chroots
   on the beehive build machines
@@ -933,7 +938,7 @@ uint16's in the python bindings
 * Thu Aug 05 2004 John (J5) Palmieri <johnp@redhat.com>
 - Added BuildRequires for libselinux-devel and Requires for libselinux
 
-* Tue Aug 02 2004 Colin Walters <walters@redhat.com>
+* Mon Aug 02 2004 Colin Walters <walters@redhat.com>
 - Add SE-DBus patch
 
 * Fri Jul 30 2004 John (J5) Palmieri <johnp@redhat.com>
