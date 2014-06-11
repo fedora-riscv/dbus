@@ -41,6 +41,7 @@ BuildRequires: valgrind-devel
 BuildRequires: xmlto
 BuildRequires: libxslt
 BuildRequires:  systemd-units
+BuildRequires:  systemd-devel
 Requires(post): systemd-units chkconfig
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -257,7 +258,8 @@ fi
 %{_includedir}/*
 
 %changelog
-* Tue Jan 21 2014 Ville Skyttä <ville.skytta@iki.fi> - 1:1.6.28-2
+* Tue Jun 10 2014 Colin Walters <walters@redhat.com> - 1:1.6.28-2
+- BR systemd-devel
 - Adapt to unversioned docdirs; don't ship all docs in main package.
 - Fix bogus dates in %%changelog and tabs vs spaces warning.
 
