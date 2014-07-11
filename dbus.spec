@@ -148,7 +148,7 @@ rm -rf %{buildroot}%{_initrddir}
 mkdir -p %{buildroot}/var/lib/dbus
 
 install -pm 644 -t %{buildroot}%{_pkgdocdir} \
-    COPYING doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
+    doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
 
 %check
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
@@ -197,10 +197,13 @@ fi
 
 %files
 %defattr(-,root,root)
-
+# Strictly speaking, we could remove the COPYING from this subpackage and 
+# just have it be in libs, because dbus Requires dbus-libs
+# However, since it lived here before, I left it in place.
+# Maintainer, feel free to remove it from here if you wish.
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 %dir %{_pkgdocdir}
-%{_pkgdocdir}/COPYING
-
 %dir %{_sysconfdir}/dbus-1
 %config %{_sysconfdir}/dbus-1/*.conf
 %dir %{_sysconfdir}/dbus-1/system.d
@@ -234,6 +237,8 @@ fi
 
 %files libs
 %defattr(-,root,root,-)
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 /%{_lib}/*dbus-1*.so.*
 
 %files x11
@@ -246,7 +251,6 @@ fi
 %files doc
 %defattr(-,root,root)
 %{_pkgdocdir}/*
-%exclude %{_pkgdocdir}/COPYING
 
 %files devel
 %defattr(-,root,root)
@@ -258,7 +262,8 @@ fi
 %{_includedir}/*
 
 %changelog
-* Tue Jun 10 2014 Colin Walters <walters@redhat.com> - 1:1.6.28-2
+* Fri Jul 11 2014 Tom Callaway <spot@fedoraproject.org> - 1:1.6.28-2
+- fix license handling
 - BR systemd-devel
 - Adapt to unversioned docdirs; don't ship all docs in main package.
 - Fix bogus dates in %%changelog and tabs vs spaces warning.
