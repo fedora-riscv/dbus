@@ -12,8 +12,8 @@
 Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
-Version: 1.6.12
-Release: 2%{?dist}
+Version: 1.6.28
+Release: 1%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -42,8 +42,6 @@ Requires(pre): /usr/sbin/useradd
 
 # FIXME this should be upstreamed; need --daemon-bindir=/bin and --bindir=/usr/bin or something?
 Patch0: bindir.patch
-# fdo#68945; fixed in dbus >= 1.6.14
-Patch1: 0001-_dbus_babysitter_unref-avoid-infinite-loop-if-waitpi.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -93,7 +91,6 @@ in this separate package so server systems need not install X.
 /bin/chmod 0644 COPYING ChangeLog NEWS
 
 %patch0 -p1 -b .bindir
-%patch1 -p1 -b .loop
 
 %build
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
@@ -228,6 +225,19 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu Nov 27 2014 David King <amigadave@amigadave.com> - 1:1.6.28-1
+- Update to 1.6.28
+- Fixes CVE-2014-3635 (fd.o#83622)
+- Fixes CVE-2014-3636 (fd.o#82820)
+- Fixes CVE-2014-3637 (fd.o#80559)
+- Fixes CVE-2014-3638 (fd.o#81053)
+- Fixes CVE-2014-3639 (fd.o#80919)
+- Fixes CVE-2014-7824 (fd.o#85105)
+- Fixes CVE-2014-3477 (fd.o#78979)
+- Fixes CVE-2014-3532 (fd.o#80163)
+- Fixes CVE-2014-3533 (fd.o#80469)
+- Resolves #1115636
+
 * Mon Nov 11 2013 Dan Williams <dcbw@redhat.com> - 1:1.6.12-2
 - Fix fdo#68945; infinite loop in _dbus_babysitter_unref()
 
