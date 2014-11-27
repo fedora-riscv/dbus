@@ -16,8 +16,8 @@
 Summary: D-BUS message bus
 Name: dbus
 Epoch: 1
-Version: 1.6.12
-Release: 9%{?dist}
+Version: 1.6.28
+Release: 1%{?dist}
 URL: http://www.freedesktop.org/software/dbus/
 #VCS: git:git://git.freedesktop.org/git/dbus/dbus
 Source0: http://dbus.freedesktop.org/releases/dbus/%{name}-%{version}.tar.gz
@@ -58,12 +58,6 @@ BuildRequires: /usr/bin/Xvfb
 # FIXME this should be upstreamed; need --daemon-bindir=/bin and --bindir=/usr/bin or something?
 Patch0: bindir.patch
 Patch1: 0001-name-test-Don-t-run-test-autolaunch-if-we-don-t-have.patch
-Patch2: 0001-test-marshal-Ensure-we-use-suitably-aligned-buffers.patch
-Patch3: avoid-undefined-7c00ed22d9b5c33f5b33221e906946b11a9bde3b.patch
-Patch4: 0001-_dbus_babysitter_unref-avoid-infinite-loop-if-waitpi.patch
-Patch5: 0001-CVE-2014-3477-deliver-activation-errors-correctly-fi.patch
-Patch6: 0001-If-loader-contains-two-messages-with-fds-don-t-corru.patch
-Patch7: 0001-Handle-ETOOMANYREFS-when-sending-recursive-fds-SCM_R.patch
 
 %description
 D-BUS is a system for sending messages between applications. It is
@@ -114,12 +108,6 @@ in this separate package so server systems need not install X.
 
 %patch0 -p1 -b .bindir
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
 
 %build
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
@@ -268,6 +256,15 @@ fi
 %{_includedir}/*
 
 %changelog
+* Thu Nov 27 2014 David King <amigadave@amigadave.com> - 1:1.6.28-1
+- Update to 1.6.28
+- Fixes CVE-2014-3635 (fd.o#83622)
+- Fixes CVE-2014-3636 (fd.o#82820)
+- Fixes CVE-2014-3637 (fd.o#80559)
+- Fixes CVE-2014-3638 (fd.o#81053)
+- Fixes CVE-2014-3639 (fd.o#80919)
+- Fixes CVE-2014-7824 (fd.o#85105)
+
 * Wed Jul 2 2014 Colin Walters <walters@redhat.com> - 1:1.6.12-9
 - Backport patches from dbus-1.6
 - Fixes CVE-2014-3477 (fd.o#78979)
