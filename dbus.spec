@@ -5,14 +5,14 @@
 %global has_valgrind 1
 %endif
 
-%define gettext_package dbus
+%global gettext_package         dbus-1
 
-%define expat_version           1.95.5
-%define libselinux_version      1.15.2
+%global expat_version           1.95.5
+%global libselinux_version      1.15.2
 
-%define dbus_user_uid           81
+%global dbus_user_uid           81
 
-%define dbus_common_config_opts --enable-libaudit --enable-selinux=yes --with-init-scripts=redhat --with-system-pid-file=%{_localstatedir}/run/messagebus.pid --with-dbus-user=dbus --libdir=/%{_lib} --bindir=/bin --sysconfdir=/etc --exec-prefix=/ --libexecdir=/%{_lib}/dbus-1 --with-systemdsystemunitdir=/lib/systemd/system/ --docdir=%{_pkgdocdir} --enable-doxygen-docs --enable-xml-docs --disable-silent-rules --disable-Werror
+%global dbus_common_config_opts --enable-libaudit --enable-selinux=yes --with-init-scripts=redhat --with-system-pid-file=%{_localstatedir}/run/messagebus.pid --with-dbus-user=dbus --libdir=/%{_lib} --bindir=/bin --sysconfdir=/etc --exec-prefix=/ --libexecdir=/%{_lib}/dbus-1 --with-systemdsystemunitdir=/lib/systemd/system/ --docdir=%{_pkgdocdir} --enable-doxygen-docs --enable-xml-docs --disable-Werror
 
 Name:    dbus
 Epoch:   1
@@ -35,20 +35,25 @@ BuildRequires: libselinux-devel >= %{libselinux_version}
 BuildRequires: audit-libs-devel >= 0.9
 BuildRequires: libX11-devel
 BuildRequires: libcap-ng-devel
-BuildRequires: gettext
+BuildRequires: pkgconfig(libsystemd-daemon)
+BuildRequires: pkgconfig(libsystemd-login)
+BuildRequires: pkgconfig(systemd)
 BuildRequires: doxygen
 %if 0%{?has_valgrind}
 BuildRequires: valgrind-devel
 %endif
+# For building XML documentation.
+BuildRequires: /usr/bin/xsltproc
 BuildRequires: xmlto
-BuildRequires: libxslt
-BuildRequires:  systemd-units
-BuildRequires:  systemd-devel
-Requires(post): systemd-units chkconfig
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Requires: libselinux%{?_isa} >= %{libselinux_version}
-Requires: dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
+
+#For macroized scriptlets.
+Requires(post):   systemd
+Requires(preun):  systemd
+Requires(postun): systemd
+BuildRequires:    systemd
+
+Requires:      libselinux%{?_isa} >= %{libselinux_version}
+Requires:      dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 
 # Note: These is only required for --enable-tests; when bootstrapping,
@@ -112,7 +117,7 @@ in this separate package so server systems need not install X.
 %build
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
 %configure %{dbus_common_config_opts} --disable-tests --disable-asserts
-make
+make %{?_smp_mflags} V=1
 
 %install
 rm -rf %{buildroot}
@@ -185,17 +190,13 @@ rm -rf %{buildroot}
 %post libs -p /sbin/ldconfig
 
 %preun
-if [ $1 = 0 ]; then
-  /bin/systemctl stop dbus.service dbus.socket > /dev/null 2>&1 || :
-fi
+%systemd_preun stop dbus.service dbus.socket
 
 %postun libs -p /sbin/ldconfig
 
 %postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+%systemd_postun
 
-%triggerun -- dbus < 1.4.10-2
-/sbin/chkconfig --del messagebus >/dev/null 2>&1 || :
 
 %files
 %defattr(-,root,root)
@@ -265,6 +266,7 @@ fi
 
 %changelog
 * Wed Dec 03 2014 David King <amigadave@amigadave.com> - 1:1.6.28-2
+- Use macroized systemd scriptlets (#850083)
 - Correct license description for multiple licenses
 - fix license handling
 - BR systemd-devel
