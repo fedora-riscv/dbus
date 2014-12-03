@@ -93,7 +93,7 @@ other supporting documentation such as the introspect dtd file.
 %package devel
 Summary: Development files for D-BUS
 Group: Development/Libraries
-Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description devel
 This package contains libraries and header files needed for
@@ -102,11 +102,13 @@ developing software that uses D-BUS.
 %package x11
 Summary: X11-requiring add-ons for D-BUS
 Group: Development/Libraries
-Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+Requires: xorg-x11-xinit
 
 %description x11
 D-BUS contains some tools that require Xlib to be installed, those are
 in this separate package so server systems need not install X.
+
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -278,8 +280,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/dbus-1.pc
 %{_includedir}/*
 
+
 %changelog
 * Wed Dec 03 2014 David King <amigadave@amigadave.com> - 1:1.6.28-2
+- Tighten subpackage dependencies by using %%{?_isa}
 - Add some more documentation from the upstream tarball
 - Use macroized systemd scriptlets (#850083)
 - Correct license description for multiple licenses
