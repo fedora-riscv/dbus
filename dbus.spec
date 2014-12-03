@@ -31,17 +31,21 @@ BuildRequires: libselinux-devel >= %{libselinux_version}
 BuildRequires: audit-libs-devel >= 0.9
 BuildRequires: libX11-devel
 BuildRequires: libcap-ng-devel
-BuildRequires: gettext
+BuildRequires: pkgconfig(libsystemd)
+BuildRequires: pkgconfig(systemd)
 BuildRequires: doxygen
+# For building XML documentation.
+BuildRequires: /usr/bin/xsltproc
 BuildRequires: xmlto
-BuildRequires: libxslt
-BuildRequires:  systemd-units
-BuildRequires:  systemd-devel
-Requires(post): systemd-units chkconfig
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Requires: libselinux%{?_isa} >= %{libselinux_version}
-Requires: dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
+
+#For macroized scriptlets.
+Requires(post):   systemd
+Requires(preun):  systemd
+Requires(postun): systemd
+BuildRequires:    systemd
+
+Requires:      libselinux%{?_isa} >= %{libselinux_version}
+Requires:      dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 
 # Note: These is only required for --enable-tests; when bootstrapping,
@@ -155,17 +159,13 @@ rm -rf %{buildroot}
 %post libs -p /sbin/ldconfig
 
 %preun
-if [ $1 = 0 ]; then
-  /bin/systemctl stop dbus.service dbus.socket > /dev/null 2>&1 || :
-fi
+%systemd_preun stop dbus.service dbus.socket
 
 %postun libs -p /sbin/ldconfig
 
 %postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+%systemd_postun
 
-%triggerun -- dbus < 1.4.10-2
-/sbin/chkconfig --del messagebus >/dev/null 2>&1 || :
 
 %files
 %defattr(-,root,root)
@@ -238,6 +238,7 @@ fi
 %changelog
 * Fri Dec 05 2014 David King <amigadave@amigadave.com> - 1:1.8.12-2
 - Correct license description for multiple licenses
+- Use macroized systemd scriptlets (#850083)
 
 * Wed Nov 26 2014 David King <amigadave@amigadave.com> - 1:1.8.12-1
 - Update to 1.8.12 (#1168438)
