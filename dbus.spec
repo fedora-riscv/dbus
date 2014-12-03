@@ -157,6 +157,10 @@ mkdir -p %{buildroot}/var/lib/dbus
 install -pm 644 -t %{buildroot}%{_pkgdocdir} \
     doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
 
+# Make sure that the documentation shows up in Devhelp.
+mkdir -p %{buildroot}%{_datadir}/gtk-doc/html
+ln -s %{_pkgdocdir} %{buildroot}%{_datadir}/gtk-doc/html/dbus
+
 %check
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
 %configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests --enable-developer \
@@ -201,12 +205,16 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 # Strictly speaking, we could remove the COPYING from this subpackage and 
-# just have it be in libs, because dbus Requires dbus-libs
-# However, since it lived here before, I left it in place.
-# Maintainer, feel free to remove it from here if you wish.
+# just have it be in libs, because dbus Requires dbus-libs.
 %{!?_licensedir:%global license %%doc}
 %license COPYING
-%dir %{_pkgdocdir}
+%doc AUTHORS ChangeLog HACKING NEWS README
+%exclude %{_pkgdocdir}/api
+%exclude %{_pkgdocdir}/dbus.devhelp
+%exclude %{_pkgdocdir}/diagram.*
+%exclude %{_pkgdocdir}/introspect.*
+%exclude %{_pkgdocdir}/system-activation.txt
+%exclude %{_pkgdocdir}/*.html
 %dir %{_sysconfdir}/dbus-1
 %config %{_sysconfdir}/dbus-1/*.conf
 %dir %{_sysconfdir}/dbus-1/system.d
@@ -254,6 +262,12 @@ rm -rf %{buildroot}
 %files doc
 %defattr(-,root,root)
 %{_pkgdocdir}/*
+%{_datadir}/gtk-doc
+%exclude %{_pkgdocdir}/AUTHORS
+%exclude %{_pkgdocdir}/ChangeLog
+%exclude %{_pkgdocdir}/HACKING
+%exclude %{_pkgdocdir}/NEWS
+%exclude %{_pkgdocdir}/README
 
 %files devel
 %defattr(-,root,root)
@@ -266,6 +280,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Wed Dec 03 2014 David King <amigadave@amigadave.com> - 1:1.6.28-2
+- Add some more documentation from the upstream tarball
 - Use macroized systemd scriptlets (#850083)
 - Correct license description for multiple licenses
 - fix license handling
