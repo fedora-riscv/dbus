@@ -167,6 +167,10 @@ install -pm 644 -t %{buildroot}%{_pkgdocdir} \
 mkdir -p %{buildroot}%{_datadir}/gtk-doc/html
 ln -s %{_pkgdocdir} %{buildroot}%{_datadir}/gtk-doc/html/dbus
 
+# dbus.target was removed, in favor of dbus.socket, from systemd 21.
+rm -r %{buildroot}/lib/systemd/system/dbus.target.wants
+
+
 %if %{with tests}
 %check
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
@@ -250,7 +254,6 @@ rm -rf %{buildroot}
 %attr(4750,root,dbus) /%{_lib}/dbus-1/dbus-daemon-launch-helper
 /lib/systemd/system/dbus.service
 /lib/systemd/system/dbus.socket
-/lib/systemd/system/dbus.target.wants/dbus.socket
 /lib/systemd/system/messagebus.service
 /lib/systemd/system/multi-user.target.wants/dbus.service
 /lib/systemd/system/sockets.target.wants/dbus.socket
@@ -289,7 +292,8 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Wed Dec 03 2014 David King <amigadave@amigadave.com> - 1:1.6.28-2
+* Thu Dec 04 2014 David King <amigadave@amigadave.com> - 1:1.6.28-2
+- Remove obsolete dbus.target.wants (#1084087)
 - Use --with-tests to conditionalize test dependencies
 - Tighten subpackage dependencies by using %%{?_isa}
 - Add some more documentation from the upstream tarball
