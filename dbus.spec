@@ -5,6 +5,8 @@
 %global has_valgrind 1
 %endif
 
+%bcond_without tests
+
 %global gettext_package         dbus-1
 
 %global expat_version           1.95.5
@@ -56,13 +58,15 @@ Requires:      libselinux%{?_isa} >= %{libselinux_version}
 Requires:      dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 
-# Note: These is only required for --enable-tests; when bootstrapping,
-# you can remove this and drop the --enable-tests configure argument.
+# Note: These is only required for --with-tests; when bootstrapping, you can
+# pass --without-tests.
+%if %{with tests}
 BuildRequires: pkgconfig(gio-2.0)
 BuildRequires: pkgconfig(dbus-glib-1)
 BuildRequires: dbus-python
 BuildRequires: pygobject2
 BuildRequires: /usr/bin/Xvfb
+%endif
 
 # FIXME this should be upstreamed; need --daemon-bindir=/bin and --bindir=/usr/bin or something?
 Patch0: bindir.patch
@@ -163,6 +167,7 @@ install -pm 644 -t %{buildroot}%{_pkgdocdir} \
 mkdir -p %{buildroot}%{_datadir}/gtk-doc/html
 ln -s %{_pkgdocdir} %{buildroot}%{_datadir}/gtk-doc/html/dbus
 
+%if %{with tests}
 %check
 if test -f autogen.sh; then env NOCONFIGURE=1 ./autogen.sh; else autoreconf -v -f -i; fi
 %configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests --enable-developer \
@@ -183,6 +188,8 @@ if ! env DBUS_TEST_SLOW=1 make check; then
     echo  "Exiting abnormally due to make check failure above" 1>&2;
     exit 1;
 fi
+%endif
+
 
 %clean
 rm -rf %{buildroot}
@@ -283,6 +290,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Wed Dec 03 2014 David King <amigadave@amigadave.com> - 1:1.6.28-2
+- Use --with-tests to conditionalize test dependencies
 - Tighten subpackage dependencies by using %%{?_isa}
 - Add some more documentation from the upstream tarball
 - Use macroized systemd scriptlets (#850083)
