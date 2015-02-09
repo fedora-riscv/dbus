@@ -18,8 +18,8 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.6.28
-Release: 3%{?dist}
+Version: 1.6.30
+Release: 1%{?dist}
 Summary: D-BUS message bus
 
 Group:   System Environment/Libraries
@@ -294,6 +294,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Feb 09 2015 David King <amigadave@amigadave.com> - 1:1.6.30-1
+- Update to 1.6.30
+- Fixes CVE-2015-0245 (fd.o#88811)
+
 * Thu Dec 18 2014 David King <amigadave@amigadave.com> - 1:1.6.28-3
 - Relax subpackage dependencies (#1175837)
 
