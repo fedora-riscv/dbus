@@ -15,8 +15,8 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.8.16
-Release: 2%{?dist}
+Version: 1.8.18
+Release: 1%{?dist}
 Summary: D-BUS message bus
 
 Group:   System Environment/Libraries
@@ -256,6 +256,9 @@ fi
 
 
 %changelog
+* Thu May 14 2015 David King <amigadave@amigadave.com> - 1:1.8.18-1
+- Update to 1.8.18
+
 * Mon Mar 16 2015 Than Ngo <than@redhat.com> - 1:1.8.16-2
 - bump release and rebuild so that koji-shadow can rebuild it
   against new gcc on secondary arch
