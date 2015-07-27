@@ -15,7 +15,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.8.18
+Version: 1.8.20
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -256,6 +256,9 @@ fi
 
 
 %changelog
+* Mon Jul 27 2015 David King <amigadave@amigadave.com> - 1:1.8.20-1
+- Update to 1.8.20
+
 * Thu May 14 2015 David King <amigadave@amigadave.com> - 1:1.8.18-1
 - Update to 1.8.18
 
