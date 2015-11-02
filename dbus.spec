@@ -17,7 +17,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.10.0
+Version: 1.10.2
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -118,7 +118,7 @@ in this separate package so server systems need not install X.
 
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q
 
 
 %build
@@ -339,6 +339,9 @@ popd
 
 
 %changelog
+* Mon Nov 02 2015 David King <amigadave@amigadave.com> - 1:1.10.2-1
+- Update to 1.10.2
+
 * Wed Aug 26 2015 David King <amigadave@amigadave.com> - 1:1.10.0-1
 - Update to 1.10.0
 
