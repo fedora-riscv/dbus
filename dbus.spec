@@ -17,7 +17,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.10.6
+Version: 1.10.8
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -339,6 +339,9 @@ popd
 
 
 %changelog
+* Thu Mar 17 2016 David King <amigadave@amigadave.com> - 1:1.10.8-1
+- Update to 1.10.8
+
 * Wed Dec 02 2015 David King <amigadave@amigadave.com> - 1:1.10.6-1
 - Update to 1.10.6
 
