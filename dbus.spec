@@ -17,7 +17,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.11.8
+Version: 1.11.10
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -315,6 +315,7 @@ popd
 %{_userunitdir}/dbus.service
 %{_userunitdir}/dbus.socket
 %{_userunitdir}/sockets.target.wants/dbus.socket
+%{_sysusersdir}/dbus.conf
 
 %files libs
 %{!?_licensedir:%global license %%doc}
@@ -350,6 +351,9 @@ popd
 
 
 %changelog
+* Fri Feb 17 2017 David King <amigadave@amigadave.com> - 1:1.11.10-1
+- Update to 1.11.10
+
 * Tue Nov 29 2016 David King <amigadave@amigadave.com> - 1:1.11.8-1
 - Update to 1.11.8
 
