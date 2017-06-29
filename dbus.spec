@@ -3,8 +3,7 @@
 
 %global gettext_package         dbus-1
 
-%global expat_version           1.95.5
-%global libselinux_version      1.15.2
+%global libselinux_version      2.0.86
 
 %global dbus_user_uid           81
 
@@ -17,7 +16,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.11.12
+Version: 1.11.14
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -32,11 +31,11 @@ Source1: 00-start-message-bus.sh
 
 BuildRequires: autoconf-archive
 BuildRequires: libtool
-BuildRequires: expat-devel >= %{expat_version}
-BuildRequires: libselinux-devel >= %{libselinux_version}
 BuildRequires: audit-libs-devel >= 0.9
 BuildRequires: libX11-devel
 BuildRequires: libcap-ng-devel
+BuildRequires: pkgconfig(expat)
+BuildRequires: pkgconfig(libselinux) >= %{libselinux_version}
 BuildRequires: pkgconfig(libsystemd)
 BuildRequires: pkgconfig(systemd)
 BuildRequires: doxygen
@@ -58,7 +57,7 @@ Requires(pre): /usr/sbin/useradd
 # Note: These is only required for --with-tests; when bootstrapping, you can
 # pass --without-tests.
 %if %{with tests}
-BuildRequires: pkgconfig(gio-2.0)
+BuildRequires: pkgconfig(gio-2.0) >= 2.40.0
 BuildRequires: dbus-python
 BuildRequires: pygobject3
 %endif
@@ -313,6 +312,7 @@ popd
 # behind these permissions
 %attr(4750,root,dbus) %{_libexecdir}/dbus-1/dbus-daemon-launch-helper
 %exclude %{_libexecdir}/dbus-1/dbus-run-installed-tests
+%{_tmpfilesdir}/dbus.conf
 %{_unitdir}/dbus.service
 %{_unitdir}/dbus.socket
 %{_unitdir}/messagebus.service
@@ -358,6 +358,9 @@ popd
 
 
 %changelog
+* Thu Jun 29 2017 David King <amigadave@amigadave.com> - 1:1.11.14-1
+- Update to 1.11.14
+
 * Fri Apr 07 2017 David King <amigadave@amigadave.com> - 1:1.11.12-1
 - Update to 1.11.12
 
