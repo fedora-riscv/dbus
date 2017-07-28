@@ -16,7 +16,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.11.14
+Version: 1.11.16
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -358,6 +358,9 @@ popd
 
 
 %changelog
+* Fri Jul 28 2017 David King <amigadave@amigadave.com> - 1:1.11.16-1
+- Update to 1.11.16
+
 * Thu Jun 29 2017 David King <amigadave@amigadave.com> - 1:1.11.14-1
 - Update to 1.11.14
 
