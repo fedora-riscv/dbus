@@ -22,8 +22,8 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.12.10
-Release: 8%{?dist}
+Version: 1.12.12
+Release: 1%{?dist}
 Summary: D-BUS message bus
 
 Group:   System Environment/Libraries
@@ -371,7 +371,7 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 # just have it be in libs, because dbus Requires dbus-libs.
 %{!?_licensedir:%global license %%doc}
 %license COPYING
-%doc AUTHORS ChangeLog HACKING NEWS README
+%doc AUTHORS ChangeLog CONTRIBUTING.md NEWS README
 %exclude %{_pkgdocdir}/api
 %exclude %{_pkgdocdir}/dbus.devhelp
 %exclude %{_pkgdocdir}/diagram.*
@@ -446,6 +446,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Tue Dec 04 2018 David King <amigadave@amigadave.com> - 1:1.12.12-1
+- Update to 1.12.12
+
 * Mon Jan 21 2019 David King <amigadave@amigadave.com> - 1:1.12.10-8
 - Fix requirement on fedora-release
 
