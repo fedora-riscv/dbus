@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.12
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: D-BUS message bus
 
 Group:   System Environment/Libraries
@@ -143,8 +143,7 @@ other supporting documentation such as the introspect dtd file.
 %package devel
 Summary: Development files for D-BUS
 Group: Development/Libraries
-# The server package can be a different architecture.
-Requires: %{name}-daemon = %{epoch}:%{version}-%{release}
+Requires: dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 # For xml directory ownership.
 Requires: xml-common
 
@@ -449,6 +448,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Fri Dec 14 2018 David King <amigadave@amigadave.com> - 1:1.12.12-2
+- Change -devel subpackage to depend on -libs
+
 * Tue Dec 04 2018 David King <amigadave@amigadave.com> - 1:1.12.12-1
 - Update to 1.12.12
 
