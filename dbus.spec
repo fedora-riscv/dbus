@@ -140,8 +140,7 @@ other supporting documentation such as the introspect dtd file.
 %package devel
 Summary: Development files for D-BUS
 Group: Development/Libraries
-# The server package can be a different architecture.
-Requires: %{name}-daemon = %{epoch}:%{version}-%{release}
+Requires: dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 # For xml directory ownership.
 Requires: xml-common
 
@@ -446,8 +445,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
-* Tue Dec 04 2018 David King <amigadave@amigadave.com> - 1:1.12.12-1
+* Mon Jan 21 2019 David King <amigadave@amigadave.com> - 1:1.12.12-1
 - Update to 1.12.12
+- Change -devel subpackage to depend on -libs
 
 * Mon Jan 21 2019 David King <amigadave@amigadave.com> - 1:1.12.10-8
 - Fix requirement on fedora-release
