@@ -6,6 +6,7 @@
 %global libselinux_version      2.0.86
 
 # fedora-release-29-0.12 added required presets to enable systemd-unit symlinks
+# generic-release does not yet have the required presets
 %global fedora_release_version  29-0.12
 
 %global dbus_user_uid           81
@@ -22,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.10
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: D-BUS message bus
 
 Group:   System Environment/Libraries
@@ -86,7 +87,7 @@ Summary:        D-BUS message bus configuration
 Group:          System Environment/Libraries
 BuildArch:      noarch
 %{?systemd_requires}
-Requires:       fedora-release >= %{fedora_release_version}
+Conflicts:      fedora-release < %{fedora_release_version}
 Requires:       /usr/bin/systemctl
 
 %description common
@@ -97,7 +98,7 @@ implementations to provide a System and User Message Bus.
 Summary:        D-BUS message bus
 Group:          System Environment/Libraries
 %{?systemd_requires}
-Requires:       fedora-release >= %{fedora_release_version}
+Conflicts:      fedora-release < %{fedora_release_version}
 Requires:       libselinux%{?_isa} >= %{libselinux_version}
 Requires:       dbus-common = %{epoch}:%{version}-%{release}
 Requires:       dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
@@ -445,6 +446,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Mon Jan 21 2019 David King <amigadave@amigadave.com> - 1:1.12.10-8
+- Fix requirement on fedora-release
+
 * Tue Nov 06 2018 Tom Gundersen <teg@jklm.no> - 1:1.12.10-7
 - Fix the messagebus.service alias
 
