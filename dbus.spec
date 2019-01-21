@@ -333,11 +333,11 @@ popd
 %systemd_postun dbus-daemon.service
 %systemd_user_postun dbus-daemon.service
 
-%triggerpostun common -- dbus-common < 1:1.12.10-4
+%triggerpostun common -- dbus-common < 1:1.12.12-1
 systemctl --no-reload preset dbus.socket &>/dev/null || :
 systemctl --no-reload --global preset dbus.socket &>/dev/null || :
 
-%triggerpostun daemon -- dbus-daemon < 1:1.12.10-7
+%triggerpostun daemon -- dbus-daemon < 1:1.12.12-1
 systemctl --no-reload preset dbus-daemon.service &>/dev/null || :
 systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
@@ -448,6 +448,7 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 * Mon Jan 21 2019 David King <amigadave@amigadave.com> - 1:1.12.12-1
 - Update to 1.12.12
 - Change -devel subpackage to depend on -libs
+- Ensure presets are applied during this upgrade only
 
 * Mon Jan 21 2019 David King <amigadave@amigadave.com> - 1:1.12.10-8
 - Fix requirement on fedora-release
