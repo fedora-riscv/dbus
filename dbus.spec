@@ -26,7 +26,6 @@ Version: 1.12.12
 Release: 2%{?dist}
 Summary: D-BUS message bus
 
-Group:   System Environment/Libraries
 # The effective license of the majority of the package, including the shared
 # library, is "GPL-2+ or AFL-2.1". Certain utilities are "GPL-2+" only.
 License: (GPLv2+ or AFL) and GPLv2+
@@ -85,7 +84,6 @@ per-user-login-session messaging facility.
 
 %package common
 Summary:        D-BUS message bus configuration
-Group:          System Environment/Libraries
 BuildArch:      noarch
 %{?systemd_requires}
 Conflicts:      fedora-release < %{fedora_release_version}
@@ -98,7 +96,6 @@ implementations to provide a System and User Message Bus.
 
 %package daemon
 Summary:        D-BUS message bus
-Group:          System Environment/Libraries
 %{?systemd_requires}
 Conflicts:      fedora-release < %{fedora_release_version}
 Conflicts:      generic-release < %{generic_release_version}
@@ -116,7 +113,6 @@ per-user-login-session messaging facility.
 
 %package tools
 Summary:        D-BUS Tools and Utilities
-Group:          Development/Libraries
 Requires:       dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description tools
@@ -125,14 +121,12 @@ the reference implementation.
 
 %package libs
 Summary: Libraries for accessing D-BUS
-Group: Development/Libraries
 
 %description libs
 This package contains lowlevel libraries for accessing D-BUS.
 
 %package doc
 Summary: Developer documentation for D-BUS
-Group: Documentation
 Requires: %{name}-daemon = %{epoch}:%{version}-%{release}
 BuildArch: noarch
 
@@ -142,7 +136,6 @@ other supporting documentation such as the introspect dtd file.
 
 %package devel
 Summary: Development files for D-BUS
-Group: Development/Libraries
 Requires: dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 # For xml directory ownership.
 Requires: xml-common
@@ -153,7 +146,6 @@ developing software that uses D-BUS.
 
 %package tests
 Summary: Tests for the %{name}-daemon package
-Group: Development/Libraries
 Requires: %{name}-daemon%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description tests
@@ -162,7 +154,6 @@ the functionality of the installed %{name}-daemon package.
 
 %package x11
 Summary: X11-requiring add-ons for D-BUS
-Group: Development/Libraries
 # The server package can be a different architecture.
 Requires: %{name}-daemon = %{epoch}:%{version}-%{release}
 
