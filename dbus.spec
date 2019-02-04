@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.12
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -68,7 +68,7 @@ BuildRequires:    systemd
 %if %{with tests}
 BuildRequires: pkgconfig(gio-2.0) >= 2.40.0
 BuildRequires: python3-dbus
-BuildRequires: pygobject3
+BuildRequires: python2-gobject
 %endif
 %if %{with check}
 BuildRequires: /usr/bin/Xvfb
@@ -439,6 +439,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Mon Feb 04 2019 Kalev Lember <klember@redhat.com> - 1:1.12.12-4
+- Update requires for pygobject3 -> python2-gobject rename
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.12.12-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
