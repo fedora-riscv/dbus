@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.12
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -356,6 +356,8 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 %config %{_sysconfdir}/dbus-1/session.conf
 %config %{_sysconfdir}/dbus-1/system.conf
 %dir %{_datadir}/dbus-1
+%dir %{_datadir}/dbus-1/session.d
+%dir %{_datadir}/dbus-1/system.d
 %{_datadir}/dbus-1/session.conf
 %{_datadir}/dbus-1/system.conf
 %{_datadir}/dbus-1/services
@@ -445,6 +447,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Thu Apr 04 2019 David King <amigadave@amigadave.com> - 1:1.12.12-6
+- Own system.d and session.d directories (#1696385)
+
 * Sun Mar 03 2019 Leigh Scott <leigh123linux@googlemail.com> - 1:1.12.12-5
 - Fix f30 FTBFS
 
