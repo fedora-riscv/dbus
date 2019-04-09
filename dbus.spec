@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.12
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -305,9 +305,15 @@ popd
 
 %pre daemon
 # Add the "dbus" user and group
-/usr/sbin/groupadd -r -g %{dbus_user_uid} dbus 2>/dev/null || :
-/usr/sbin/useradd -c 'System message bus' -u %{dbus_user_uid} -g %{dbus_user_uid} \
-    -s /sbin/nologin -r -d '/' dbus 2> /dev/null || :
+getent group dbus >/dev/null || groupadd -f -g %{dbus_user_uid} -r dbus
+if ! getent passwd dbus >/dev/null ; then
+    if ! getent passwd %{dbus_user_uid} >/dev/null ; then
+      useradd -r -u %{dbus_user_uid} -g %{dbus_user_uid} -d '/' -s /sbin/nologin -c "System message bus" dbus
+    else
+      useradd -r -g %{dbus_user_uid} -d '/' -s /sbin/nologin -c "System message bus" dbus
+    fi
+fi
+exit 0
 
 %post common
 %systemd_post dbus.socket
@@ -447,6 +453,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Tue Apr 09 2019 David King <amigadave@amigadave.com> - 1:1.12.12-7
+- Improve user and group creation (#1698001)
+
 * Thu Apr 04 2019 David King <amigadave@amigadave.com> - 1:1.12.12-6
 - Own system.d and session.d directories (#1696385)
 
