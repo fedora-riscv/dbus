@@ -22,8 +22,8 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.12.12
-Release: 7%{?dist}
+Version: 1.12.14
+Release: 1%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -38,10 +38,6 @@ Source3: dbus-daemon.service
 Source4: dbus.user.socket
 Source5: dbus-daemon.user.service
 Patch0: 0001-tools-Use-Python3-for-GetAllMatchRules.patch
-# https://cgit.freedesktop.org/dbus/dbus/commit/?h=dbus-1.12&id=6ef67cff6ba26645f9cbe23ffb401f3d49a66429
-Patch1: ax_check-fix.patch
-# Use old ax_code_coverage, gjs used a similar fix.
-Patch2: code_coverage_fix.patch
 
 BuildRequires: autoconf-archive
 BuildRequires: libtool
@@ -168,8 +164,6 @@ in this separate package so server systems need not install X.
 
 %prep
 %setup -q
-%patch1 -p1
-%patch2 -p1
 
 
 %build
@@ -453,6 +447,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Fri May 17 2019 David King <amigadave@amigadave.com> - 1:1.12.14-1
+- Update to 1.12.14
+
 * Tue Apr 09 2019 David King <amigadave@amigadave.com> - 1:1.12.12-7
 - Improve user and group creation (#1698001)
 
