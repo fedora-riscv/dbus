@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.16
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -163,7 +163,7 @@ in this separate package so server systems need not install X.
 
 
 %prep
-%setup -q
+%autosetup -p1
 
 
 %build
@@ -447,6 +447,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Thu Aug 01 2019 David King <amigadave@amigadave.com> - 1:1.12.16-3
+- Ensure that patches are applied
+
 * Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.12.16-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
