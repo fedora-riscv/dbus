@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.16
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -68,7 +68,7 @@ BuildRequires:    systemd
 %if %{with tests}
 BuildRequires: pkgconfig(gio-2.0) >= 2.40.0
 BuildRequires: python3-dbus
-BuildRequires: python2-gobject
+BuildRequires: python3-gobject
 %endif
 %if %{with check}
 BuildRequires: /usr/bin/Xvfb
@@ -447,6 +447,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Fri Jan 31 2020 David King <amigadave@amigadave.com> - 1:1.12.16-4
+- Update python2- to python3-gobject
+
 * Thu Aug 01 2019 David King <amigadave@amigadave.com> - 1:1.12.16-3
 - Ensure that patches are applied
 
