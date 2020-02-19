@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.16
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -32,16 +32,21 @@ License: (GPLv2+ or AFL) and GPLv2+
 URL:     http://www.freedesktop.org/Software/dbus/
 #VCS:    git:git://git.freedesktop.org/git/dbus/dbus
 Source0: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.gz
-Source1: 00-start-message-bus.sh
-Source2: dbus.socket
-Source3: dbus-daemon.service
-Source4: dbus.user.socket
-Source5: dbus-daemon.user.service
+Source1: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.gz.asc
+# gpg --keyserver keyring.debian.org --recv-keys 36EC5A6448A4F5EF79BEFE98E05AE1478F814C4F
+# gpg --export --export-options export-minimal > gpgkey-36EC5A6448A4F5EF79BEFE98E05AE1478F814C4F.gpg
+Source2: gpgkey-36EC5A6448A4F5EF79BEFE98E05AE1478F814C4F.gpg
+Source3: 00-start-message-bus.sh
+Source4: dbus.socket
+Source5: dbus-daemon.service
+Source6: dbus.user.socket
+Source7: dbus-daemon.user.service
 Patch0: 0001-tools-Use-Python3-for-GetAllMatchRules.patch
 
 BuildRequires: autoconf-archive
 BuildRequires: libtool
 BuildRequires: audit-libs-devel >= 0.9
+BuildRequires: gnupg2
 BuildRequires: libX11-devel
 BuildRequires: libcap-ng-devel
 BuildRequires: pkgconfig(expat)
@@ -163,6 +168,7 @@ in this separate package so server systems need not install X.
 
 
 %prep
+%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 %autosetup -p1
 
 
@@ -216,11 +222,11 @@ rm -f %{buildroot}%{_userunitdir}/dbus.{socket,service}
 rm -f %{buildroot}%{_userunitdir}/sockets.target.wants/dbus.socket
 
 # Install downstream units
-install -Dp -m755 %{SOURCE1} %{buildroot}%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
-install -Dp -m644 %{SOURCE2} %{buildroot}%{_unitdir}/dbus.socket
-install -Dp -m644 %{SOURCE3} %{buildroot}%{_unitdir}/dbus-daemon.service
-install -Dp -m644 %{SOURCE4} %{buildroot}%{_userunitdir}/dbus.socket
-install -Dp -m644 %{SOURCE5} %{buildroot}%{_userunitdir}/dbus-daemon.service
+install -Dp -m755 %{SOURCE3} %{buildroot}%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
+install -Dp -m644 %{SOURCE4} %{buildroot}%{_unitdir}/dbus.socket
+install -Dp -m644 %{SOURCE5} %{buildroot}%{_unitdir}/dbus-daemon.service
+install -Dp -m644 %{SOURCE6} %{buildroot}%{_userunitdir}/dbus.socket
+install -Dp -m644 %{SOURCE7} %{buildroot}%{_userunitdir}/dbus-daemon.service
 
 # Obsolete, but still widely used, for drop-in configuration snippets.
 install --directory %{buildroot}%{_sysconfdir}/dbus-1/session.d
@@ -447,6 +453,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Wed Feb 19 2020 David King <amigadave@amigadave.com> - 1:1.12.16-5
+- Verify GPG signature of sources
+
 * Fri Jan 31 2020 David King <amigadave@amigadave.com> - 1:1.12.16-4
 - Update python2- to python3-gobject
 
