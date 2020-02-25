@@ -237,6 +237,7 @@ install --directory %{buildroot}%{_datadir}/dbus-1/interfaces
 ## %find_lang %{gettext_package}
 
 install --directory %{buildroot}/var/lib/dbus
+install --directory %{buildroot}/run/dbus
 
 install -pm 644 -t %{buildroot}%{_pkgdocdir} \
     doc/introspect.dtd doc/introspect.xsl doc/system-activation.txt
@@ -455,6 +456,7 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 %changelog
 * Wed Feb 19 2020 David King <amigadave@amigadave.com> - 1:1.12.16-5
 - Verify GPG signature of sources
+- Improve permissions on ghosted /run/dbus
 
 * Fri Jan 31 2020 David King <amigadave@amigadave.com> - 1:1.12.16-4
 - Update python2- to python3-gobject
