@@ -22,8 +22,8 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.12.16
-Release: 5%{?dist}
+Version: 1.12.18
+Release: 1%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -454,6 +454,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Tue Jun 02 2020 David King <amigadave@amigadave.com> - 1:1.12.18-1
+- Update to 1.12.18
+
 * Wed Feb 19 2020 David King <amigadave@amigadave.com> - 1:1.12.16-5
 - Verify GPG signature of sources
 - Improve permissions on ghosted /run/dbus
