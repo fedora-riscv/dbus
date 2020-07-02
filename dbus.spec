@@ -22,7 +22,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.12.18
+Version: 1.12.20
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -454,6 +454,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Thu Jul 02 2020 David King <amigadave@amigadave.com> - 1:1.12.20-1
+- Update to 1.12.20
+
 * Tue Jun 02 2020 David King <amigadave@amigadave.com> - 1:1.12.18-1
 - Update to 1.12.18
 
