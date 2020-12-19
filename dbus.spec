@@ -78,6 +78,7 @@ BuildRequires: python3-gobject
 %if %{with check}
 BuildRequires: /usr/bin/Xvfb
 %endif
+BuildRequires: make
 
 # Since F30 the default implementation is dbus-broker over dbus-daemon
 Requires: dbus-broker >= 16-4
