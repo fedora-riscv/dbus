@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.12.20
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -91,10 +91,8 @@ per-user-login-session messaging facility.
 %package common
 Summary:        D-BUS message bus configuration
 BuildArch:      noarch
-%{?systemd_requires}
 Conflicts:      fedora-release < %{fedora_release_version}
 Conflicts:      generic-release < %{generic_release_version}
-Requires:       /usr/bin/systemctl
 
 %description common
 The %{name}-common package provides the configuration and setup files for D-Bus
@@ -102,7 +100,6 @@ implementations to provide a System and User Message Bus.
 
 %package daemon
 Summary:        D-BUS message bus
-%{?systemd_requires}
 Conflicts:      fedora-release < %{fedora_release_version}
 Conflicts:      generic-release < %{generic_release_version}
 Requires:       libselinux%{?_isa} >= %{libselinux_version}
@@ -110,7 +107,6 @@ Requires:       dbus-common = %{epoch}:%{version}-%{release}
 Requires:       dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:       dbus-tools = %{epoch}:%{version}-%{release}
 Requires(pre):  /usr/sbin/useradd
-Requires:       /usr/bin/systemctl
 
 %description daemon
 D-BUS is a system for sending messages between applications. It is
@@ -342,12 +338,16 @@ exit 0
 %systemd_user_postun dbus-daemon.service
 
 %triggerpostun common -- dbus-common < 1:1.12.10-4
-systemctl --no-reload preset dbus.socket &>/dev/null || :
-systemctl --no-reload --global preset dbus.socket &>/dev/null || :
+if [ -x /usr/bin/systemctl ]; then
+    systemctl --no-reload preset dbus.socket &>/dev/null || :
+    systemctl --no-reload --global preset dbus.socket &>/dev/null || :
+fi
 
 %triggerpostun daemon -- dbus-daemon < 1:1.12.10-7
-systemctl --no-reload preset dbus-daemon.service &>/dev/null || :
-systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
+if [ -x /usr/bin/systemctl ]; then
+    systemctl --no-reload preset dbus-daemon.service &>/dev/null || :
+    systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
+fi
 
 %files
 # The 'dbus' package is only retained for compatibility purposes. It will
@@ -455,6 +455,9 @@ systemctl --no-reload --global preset dbus-daemon.service &>/dev/null || :
 
 
 %changelog
+* Fri Oct 01 2021 Kalev Lember <klember@redhat.com> - 1:1.12.20-5
+- Avoid systemd_requires as per updated packaging guidelines
+
 * Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.12.20-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
