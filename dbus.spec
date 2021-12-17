@@ -22,8 +22,8 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.12.20
-Release: 5%{?dist}
+Version: 1.13.20
+Release: 1%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -31,8 +31,8 @@ Summary: D-BUS message bus
 License: (GPLv2+ or AFL) and GPLv2+
 URL:     http://www.freedesktop.org/Software/dbus/
 #VCS:    git:git://git.freedesktop.org/git/dbus/dbus
-Source0: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.gz
-Source1: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.gz.asc
+Source0: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.xz
+Source1: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.xz.asc
 # gpg --keyserver keyring.debian.org --recv-keys 36EC5A6448A4F5EF79BEFE98E05AE1478F814C4F
 # gpg --export --export-options export-minimal > gpgkey-36EC5A6448A4F5EF79BEFE98E05AE1478F814C4F.gpg
 Source2: gpgkey-36EC5A6448A4F5EF79BEFE98E05AE1478F814C4F.gpg
@@ -380,7 +380,7 @@ fi
 # just have it be in libs, because dbus Requires dbus-libs.
 %{!?_licensedir:%global license %%doc}
 %license COPYING
-%doc AUTHORS ChangeLog CONTRIBUTING.md NEWS README
+%doc AUTHORS CONTRIBUTING.md NEWS README
 %exclude %{_pkgdocdir}/api
 %exclude %{_pkgdocdir}/dbus.devhelp
 %exclude %{_pkgdocdir}/diagram.*
@@ -455,6 +455,9 @@ fi
 
 
 %changelog
+* Fri Dec 17 2021 David King <amigadave@amigadave.com> - 1:1.13.20-1
+- Update to 1.13.20
+
 * Fri Oct 01 2021 Kalev Lember <klember@redhat.com> - 1:1.12.20-5
 - Avoid systemd_requires as per updated packaging guidelines
 
