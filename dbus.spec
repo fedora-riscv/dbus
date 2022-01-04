@@ -11,7 +11,7 @@
 
 %global dbus_user_uid           81
 
-%global dbus_common_config_opts --enable-libaudit --enable-selinux=yes --with-system-socket=/run/dbus/system_bus_socket --with-dbus-user=dbus --libexecdir=/%{_libexecdir}/dbus-1 --enable-user-session --docdir=%{_pkgdocdir} --enable-installed-tests
+%global dbus_common_config_opts --enable-libaudit --enable-selinux=yes %--with-system-socket=/run/dbus/system_bus_socket --with-dbus-user=dbus %--libexecdir=/%{_libexecdir}/dbus-1 --runstatedir=/run --enable-user-session --docdir=%{_pkgdocdir} --enable-installed-tests
 
 # Allow extra dependencies required for some tests to be disabled.
 %bcond_without tests
@@ -23,7 +23,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.13.20
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -184,21 +184,21 @@ pushd build
 # See /usr/lib/rpm/macros
 %global _configure ../configure
 %configure %{dbus_common_config_opts} --enable-doxygen-docs --enable-ducktype-docs --enable-xml-docs --disable-asserts
-make V=1 %{?_smp_mflags}
+%make_build
 popd
 
 %if %{with check}
 mkdir build-check
 pushd build-check
 %configure %{dbus_common_config_opts} --enable-asserts --enable-verbose-mode --enable-tests
-make V=1 %{?_smp_mflags}
+%make_build
 popd
 %endif
 
 
 %install
 pushd build
-make install DESTDIR=%{buildroot} INSTALL="install -p"
+%make_install
 popd
 
 # Delete python2 code
@@ -455,6 +455,9 @@ fi
 
 
 %changelog
+* Tue Jan 04 2022 David King <amigadave@amigadave.com> - 1:1.13.20-2
+- Explicitly specify runstatedir (#2036943)
+
 * Fri Dec 17 2021 David King <amigadave@amigadave.com> - 1:1.13.20-1
 - Update to 1.13.20
 
