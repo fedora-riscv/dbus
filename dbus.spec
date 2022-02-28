@@ -22,8 +22,8 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.12.20
-Release: 5%{?dist}
+Version: 1.12.22
+Release: 1%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -455,6 +455,9 @@ fi
 
 
 %changelog
+* Mon Feb 28 2022 David King <amigadave@amigadave.com> - 1:1.12.22-1
+- Update to 1.12.22
+
 * Fri Oct 01 2021 Kalev Lember <klember@redhat.com> - 1:1.12.20-5
 - Avoid systemd_requires as per updated packaging guidelines
 
