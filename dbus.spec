@@ -22,15 +22,14 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.13.22
+Version: 1.14.0
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
 # library, is "GPL-2+ or AFL-2.1". Certain utilities are "GPL-2+" only.
 License: (GPLv2+ or AFL) and GPLv2+
-URL:     http://www.freedesktop.org/Software/dbus/
-#VCS:    git:git://git.freedesktop.org/git/dbus/dbus
+URL:     https://www.freedesktop.org/wiki/Software/dbus/
 Source0: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.xz
 Source1: https://dbus.freedesktop.org/releases/%{name}/%{name}-%{version}.tar.xz.asc
 # gpg --keyserver keyring.debian.org --recv-keys 36EC5A6448A4F5EF79BEFE98E05AE1478F814C4F
@@ -455,6 +454,9 @@ fi
 
 
 %changelog
+* Thu Mar 10 2022 David King <amigadave@amigadave.com> - 1:1.14.0-1
+- Update to 1.14.0
+
 * Thu Feb 24 2022 David King <amigadave@amigadave.com> - 1:1.13.22-1
 - Update to 1.13.22
 
