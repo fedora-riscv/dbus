@@ -9,9 +9,7 @@
 %global fedora_release_version  30-0.2
 %global generic_release_version 30-0.1
 
-%global dbus_user_uid           81
-
-%global dbus_common_config_opts --enable-libaudit --enable-selinux=yes %--with-system-socket=/run/dbus/system_bus_socket --with-dbus-user=dbus %--libexecdir=/%{_libexecdir}/dbus-1 --runstatedir=/run --enable-user-session --docdir=%{_pkgdocdir} --enable-installed-tests
+%global dbus_common_config_opts --enable-libaudit --enable-selinux=yes --with-system-socket=/run/dbus/system_bus_socket --with-dbus-user=dbus --libexecdir=/%{_libexecdir}/dbus-1 --runstatedir=/run --enable-user-session --docdir=%{_pkgdocdir} --enable-installed-tests
 
 # Allow extra dependencies required for some tests to be disabled.
 %bcond_without tests
@@ -23,7 +21,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.14.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -105,7 +103,6 @@ Requires:       libselinux%{?_isa} >= %{libselinux_version}
 Requires:       dbus-common = %{epoch}:%{version}-%{release}
 Requires:       dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:       dbus-tools = %{epoch}:%{version}-%{release}
-Requires(pre):  /usr/sbin/useradd
 
 %description daemon
 D-BUS is a system for sending messages between applications. It is
@@ -302,15 +299,7 @@ popd
 
 %pre daemon
 # Add the "dbus" user and group
-getent group dbus >/dev/null || groupadd -f -g %{dbus_user_uid} -r dbus
-if ! getent passwd dbus >/dev/null ; then
-    if ! getent passwd %{dbus_user_uid} >/dev/null ; then
-      useradd -r -u %{dbus_user_uid} -g %{dbus_user_uid} -d '/' -s /sbin/nologin -c "System message bus" dbus
-    else
-      useradd -r -g %{dbus_user_uid} -d '/' -s /sbin/nologin -c "System message bus" dbus
-    fi
-fi
-exit 0
+%sysusers_create_compat %{buildroot}/%{_sysusersdir}/%{name}.conf
 
 %post common
 %systemd_post dbus.socket
@@ -454,6 +443,9 @@ fi
 
 
 %changelog
+* Tue Jul 12 2022 David King <amigadave@amigadave.com> - 1:1.14.0-2
+- Use sysusers.d snippet for user configuration (#2105177)
+
 * Thu Mar 10 2022 David King <amigadave@amigadave.com> - 1:1.14.0-1
 - Update to 1.14.0
 
