@@ -21,7 +21,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.14.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -443,6 +443,9 @@ fi
 
 
 %changelog
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.14.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
 * Tue Jul 12 2022 David King <amigadave@amigadave.com> - 1:1.14.0-2
 - Use sysusers.d snippet for user configuration (#2105177)
 
