@@ -21,7 +21,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.14.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -38,6 +38,7 @@ Source4: dbus.socket
 Source5: dbus-daemon.service
 Source6: dbus.user.socket
 Source7: dbus-daemon.user.service
+Source8: dbus-systemd-sysusers.conf
 Patch0: 0001-tools-Use-Python3-for-GetAllMatchRules.patch
 
 BuildRequires: autoconf-archive
@@ -213,6 +214,7 @@ rm -f %{buildroot}%{_unitdir}/sockets.target.wants/dbus.socket
 rm -f %{buildroot}%{_unitdir}/multi-user.target.wants/dbus.service
 rm -f %{buildroot}%{_userunitdir}/dbus.{socket,service}
 rm -f %{buildroot}%{_userunitdir}/sockets.target.wants/dbus.socket
+rm -f %{buildroot}%{_sysusersdir}/dbus.conf
 
 # Install downstream units
 install -Dp -m755 %{SOURCE3} %{buildroot}%{_sysconfdir}/X11/xinit/xinitrc.d/00-start-message-bus.sh
@@ -220,6 +222,7 @@ install -Dp -m644 %{SOURCE4} %{buildroot}%{_unitdir}/dbus.socket
 install -Dp -m644 %{SOURCE5} %{buildroot}%{_unitdir}/dbus-daemon.service
 install -Dp -m644 %{SOURCE6} %{buildroot}%{_userunitdir}/dbus.socket
 install -Dp -m644 %{SOURCE7} %{buildroot}%{_userunitdir}/dbus-daemon.service
+install -Dp -m644 %{SOURCE8} %{buildroot}%{_sysusersdir}/dbus.conf
 
 # Obsolete, but still widely used, for drop-in configuration snippets.
 install --directory %{buildroot}%{_sysconfdir}/dbus-1/session.d
@@ -299,7 +302,7 @@ popd
 
 %pre daemon
 # Add the "dbus" user and group
-%sysusers_create_compat %{buildroot}/%{_sysusersdir}/%{name}.conf
+%sysusers_create_compat %{SOURCE8}
 
 %post common
 %systemd_post dbus.socket
@@ -443,6 +446,9 @@ fi
 
 
 %changelog
+* Wed Aug 03 2022 Luca BRUNO <lucab@lucabruno.net> - 1:1.14.0-4
+- Align sysusers.d configuration to Fedora user/group allocation (rhbz#2105177)
+
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.14.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
