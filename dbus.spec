@@ -21,7 +21,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.14.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -104,6 +104,7 @@ Requires:       libselinux%{?_isa} >= %{libselinux_version}
 Requires:       dbus-common = %{epoch}:%{version}-%{release}
 Requires:       dbus-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:       dbus-tools = %{epoch}:%{version}-%{release}
+%{?sysusers_requires_compat}
 
 %description daemon
 D-BUS is a system for sending messages between applications. It is
@@ -446,6 +447,9 @@ fi
 
 
 %changelog
+* Mon Aug 22 2022 Debarshi Ray <rishi@fedoraproject.org> - 1:1.14.0-5
+- Restore Requires(pre) through %%sysusers_requires_compat
+
 * Wed Aug 03 2022 Luca BRUNO <lucab@lucabruno.net> - 1:1.14.0-4
 - Align sysusers.d configuration to Fedora user/group allocation (rhbz#2105177)
 
