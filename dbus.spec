@@ -22,7 +22,7 @@
 
 Name:    dbus
 Epoch:   1
-Version: 1.14.0
+Version: 1.14.4
 Release: 1%{?dist}
 Summary: D-BUS message bus
 
@@ -454,6 +454,9 @@ fi
 
 
 %changelog
+* Thu Oct 06 2022 David King <amigadave@amigadave.com> - 1:1.14.4-1
+- Update to 1.14.4
+
 * Thu Mar 10 2022 David King <amigadave@amigadave.com> - 1:1.14.0-1
 - Update to 1.14.0
 
