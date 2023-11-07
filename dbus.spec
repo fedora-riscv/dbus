@@ -21,7 +21,7 @@
 Name:    dbus
 Epoch:   1
 Version: 1.14.10
-Release: 1%{?dist}
+Release: 1.rv64%{?dist}
 Summary: D-BUS message bus
 
 # The effective license of the majority of the package, including the shared
@@ -69,9 +69,9 @@ BuildRequires:    systemd
 # Note: These is only required for --with-tests; when bootstrapping, you can
 # pass --without-tests.
 %if %{with tests}
-BuildRequires: pkgconfig(gio-2.0) >= 2.40.0
-BuildRequires: python3-dbus
-BuildRequires: python3-gobject
+#BuildRequires: pkgconfig(gio-2.0) >= 2.40.0
+#BuildRequires: python3-dbus
+#BuildRequires: python3-gobject
 %endif
 %if %{with check}
 BuildRequires: /usr/bin/Xvfb
